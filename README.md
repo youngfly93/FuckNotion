@@ -45,8 +45,8 @@ A Notion-style WYSIWYG editor with AI-powered autocompletion, enhanced with Open
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/youngfly93/novel_pro.git
-   cd novel_pro
+   git clone https://github.com/youngfly93/FuckNotion.git
+   cd FuckNotion
    ```
 
 2. **Install dependencies**
@@ -132,7 +132,7 @@ A Notion-style WYSIWYG editor with AI-powered autocompletion, enhanced with Open
 ## 🏗️ Project Structure
 
 ```
-novel_pro/
+FuckNotion/
 ├── apps/
 │   └── web/                 # Next.js web application
 │       ├── app/
@@ -199,8 +199,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/youngfly93/novel_pro/issues)
-- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/youngfly93/novel_pro/discussions)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/youngfly93/FuckNotion/issues)
+- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/youngfly93/FuckNotion/discussions)
 - 📧 **Contact**: Create an issue for any questions
 
 ---

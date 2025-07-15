@@ -35,7 +35,7 @@ export default function Page() {
           </div>
 
           <Button size="icon" variant="outline" className="ml-auto">
-            <a href="https://github.com/youngfly93/novel_pro.git" target="_blank" rel="noreferrer">
+            <a href="https://github.com/youngfly93/FuckNotion" target="_blank" rel="noreferrer">
               <GithubIcon />
             </a>
           </Button>
