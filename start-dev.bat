@@ -1,0 +1,6 @@
+@echo off
+echo Setting UTF-8 encoding for Tauri development...
+chcp 65001 > nul
+
+echo Starting development servers...
+pnpm turbo dev

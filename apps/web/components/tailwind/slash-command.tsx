@@ -9,6 +9,7 @@ import {
   List,
   ListOrdered,
   MessageSquarePlus,
+  Table,
   Text,
   TextQuote,
   Twitter,
@@ -175,6 +176,20 @@ export const suggestionItems = createSuggestionItems([
     searchTerms: ["codeblock"],
     icon: <Code size={18} />,
     command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
+  },
+  {
+    title: "Table",
+    description: "Create a table.",
+    searchTerms: ["table", "grid", "data"],
+    icon: <Table size={18} />,
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run();
+    },
   },
   {
     title: "Image",

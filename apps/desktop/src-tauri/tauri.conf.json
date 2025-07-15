@@ -1,18 +1,18 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Novel Pro",
+  "productName": "FuckNotion",
   "version": "0.1.0",
   "identifier": "com.novelpro.desktop",
   "build": {
     "frontendDist": "../web/out",
     "beforeDevCommand": "pnpm --filter novel-next-app dev",
     "beforeBuildCommand": "pnpm --filter novel-next-app build:desktop && pnpm --filter novel-next-app export",
-    "devUrl": "http://localhost:3000"
+    "devUrl": "http://localhost:3001"
   },
   "app": {
     "windows": [
       {
-        "title": "Novel Pro",
+        "title": "FuckNotion",
         "width": 1280,
         "height": 820,
         "resizable": true,

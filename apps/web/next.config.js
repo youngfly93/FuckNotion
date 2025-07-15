@@ -58,9 +58,6 @@ const nextConfig = {
     unoptimized: process.env.BUILD_MODE === 'desktop' && process.env.NODE_ENV === 'production' ? true : false,
   },
   // Skip dynamic route validation for static export
-  experimental: {
-    // Remove invalid option - this was deprecated
-  },
 };
 
 module.exports = nextConfig;

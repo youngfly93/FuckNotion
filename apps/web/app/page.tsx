@@ -25,6 +25,15 @@ export default function Page() {
             <Menu className="h-4 w-4" />
           </Button>
 
+          <div className="flex items-center gap-2">
+            <img
+              src="/logo.png"
+              alt="FuckNotion Logo"
+              className="h-6 w-6 rounded-md object-cover"
+            />
+            <span className="font-semibold text-gray-900">FuckNotion</span>
+          </div>
+
           <Button size="icon" variant="outline" className="ml-auto">
             <a href="https://github.com/youngfly93/novel_pro.git" target="_blank" rel="noreferrer">
               <GithubIcon />

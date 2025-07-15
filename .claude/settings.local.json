@@ -52,6 +52,7 @@
       "Bash(tauri init:*)",
       "Bash(pnpm --filter novel-next-app add @tauri-apps/api)",
       "Bash(pnpm --filter novel-next-app build:desktop)",
+<<<<<<< Updated upstream
       "Bash(cargo --version)",
       "Bash(pnpm --filter novel-desktop dev)",
       "Bash(kill:*)",
@@ -59,6 +60,20 @@
       "Bash(open http://localhost:3001)",
       "Bash(pnpm tauri:*)",
       "Bash(git checkout:*)"
+=======
+      "Bash(pnpm:*)",
+      "Bash(cargo --version)",
+      "Bash(wget:*)",
+      "Bash($HOME/.cargo/bin/rustc:*)",
+      "Bash($HOME/.cargo/bin/cargo --version)",
+      "Bash(rustup toolchain:*)",
+      "Bash(rustup:*)",
+      "Bash($HOME/.cargo/bin/rustup show)",
+      "Bash(sudo apt:*)",
+      "Bash(sudo apt install:*)",
+      "Bash(chmod:*)",
+      "Bash(cp:*)"
+>>>>>>> Stashed changes
     ],
     "deny": []
   }

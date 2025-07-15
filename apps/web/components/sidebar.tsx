@@ -218,13 +218,17 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       >
         {/* Header */}
         <div className={`flex items-center justify-between p-4 transition-colors duration-300 ${
-          backgroundImage 
-            ? "border-b border-white/30 bg-white/50" 
+          backgroundImage
+            ? "border-b border-white/30 bg-white/50"
             : "border-b border-gray-200"
         }`}>
           <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-gray-700" />
-            <span className="font-semibold text-gray-900">Novel Pro</span>
+            <img
+              src="/logo.png"
+              alt="FuckNotion Logo"
+              className="h-8 w-8 rounded-md object-cover"
+            />
+            <span className="font-semibold text-gray-900">FuckNotion</span>
           </div>
           <Button variant="ghost" size="sm" onClick={onToggle} className="lg:hidden">
             <X className="h-4 w-4" />

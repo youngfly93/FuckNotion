@@ -7,6 +7,7 @@
     "version:packages": "turbo build && changeset version",
     "build": "turbo build",
     "dev": "turbo dev",
+    "dev:web": "turbo dev --filter=novel-next-app --filter=novel",
     "format": "turbo format --continue --",
     "format:fix": "turbo format --continue -- --write",
     "lint": "turbo lint --continue --",
@@ -19,6 +20,10 @@
   "dependencies": {
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.11",
+    "@tiptap/extension-table": "^2.25.0",
+    "@tiptap/extension-table-cell": "^2.25.0",
+    "@tiptap/extension-table-header": "^2.25.0",
+    "@tiptap/extension-table-row": "^2.25.0",
     "postcss-import": "^16.1.1",
     "turbo": "^2.3.3"
   },

@@ -24,6 +24,11 @@ import {
   Youtube,
 } from "novel";
 
+import Table from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableHeader from "@tiptap/extension-table-header";
+import TableCell from "@tiptap/extension-table-cell";
+
 import { cx } from "class-variance-authority";
 import { common, createLowlight } from "lowlight";
 import { PageReference } from "./page-reference-extension";
@@ -150,6 +155,12 @@ const mathematics = Mathematics.configure({
 
 const characterCount = CharacterCount.configure();
 
+// Custom function to fix markdown heading format
+const fixMarkdownHeadings = (text: string): string => {
+  // Fix headings that don't have space after #
+  return text.replace(/^(#{1,6})([^\s#])/gm, '$1 $2');
+};
+
 const markdownExtension = MarkdownExtension.configure({
   html: true,
   tightLists: true,
@@ -157,8 +168,9 @@ const markdownExtension = MarkdownExtension.configure({
   bulletListMarker: "-",
   linkify: false,
   breaks: false,
-  transformPastedText: false,
   transformCopiedText: false,
+  // Custom transform function to fix heading format
+  transformPastedText: (text: string) => fixMarkdownHeadings(text),
 });
 
 // Load autocomplete settings from localStorage with defaults
@@ -190,6 +202,32 @@ const autoComplete = AutoComplete.configure({
   maxTokens: autoCompleteSettings.maxTokens,
 });
 
+// Configure Table extensions with proper styling
+const table = Table.configure({
+  resizable: true,
+  HTMLAttributes: {
+    class: "border-collapse table-auto w-full border border-gray-300",
+  },
+});
+
+const tableRow = TableRow.configure({
+  HTMLAttributes: {
+    class: "border-b border-gray-300",
+  },
+});
+
+const tableHeader = TableHeader.configure({
+  HTMLAttributes: {
+    class: "border border-gray-300 bg-gray-50 px-4 py-2 text-left font-semibold",
+  },
+});
+
+const tableCell = TableCell.configure({
+  HTMLAttributes: {
+    class: "border border-gray-300 px-4 py-2",
+  },
+});
+
 export const defaultExtensions = [
   starterKit,
   placeholder,
@@ -214,4 +252,8 @@ export const defaultExtensions = [
   GlobalDragHandle,
   PageReference,
   autoComplete,
+  table,
+  tableRow,
+  tableHeader,
+  tableCell,
 ];
