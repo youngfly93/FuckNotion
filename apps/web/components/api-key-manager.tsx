@@ -79,6 +79,18 @@ export function ApiKeyManager() {
       } catch (error) {
         console.error("Failed to parse saved config:", error);
       }
+    } else {
+      // If no saved config, set defaults including the default model
+      const defaultProvider = PROVIDERS.openrouter;
+      setConfig({
+        apiKey: "",
+        baseUrl: defaultProvider.baseUrl,
+        model: defaultProvider.models[0].id, // Set default model to first option
+        provider: "openrouter",
+        maxTokens: 150,
+        delay: 20,
+        minLength: 3,
+      });
     }
   }, []);
 

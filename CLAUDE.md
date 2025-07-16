@@ -10,11 +10,11 @@ FuckNotion is an enhanced version of the open-source Notion-style WYSIWYG editor
 
 The project uses a monorepo structure managed by Turborepo:
 - `apps/web/` - Next.js 15 demo application showcasing the editor
-- `apps/desktop/` - Tauri desktop application wrapper
+- `apps/desktop/` - Tauri desktop application wrapper (wraps the web app)
 - `packages/headless/` - Core editor package (published as "novel" on npm)
 - `packages/tsconfig/` - Shared TypeScript configurations
 
-The core editor (`packages/headless`) is framework-agnostic and can be integrated into any React application.
+The core editor (`packages/headless`) is framework-agnostic and can be integrated into any React application. The desktop app uses Tauri to wrap the web application with native OS integration.
 
 ### Key Architectural Decisions
 - **Monorepo with Turborepo**: Enables efficient builds with dependency tracking
@@ -27,6 +27,7 @@ The core editor (`packages/headless`) is framework-agnostic and can be integrate
 ```bash
 # Development
 pnpm dev          # Start all packages in development mode
+pnpm dev:web      # Start only web app and core package (faster for web-only development)
 pnpm build        # Build all packages
 
 # Code Quality (run these before committing!)
@@ -54,10 +55,15 @@ pnpm prepare      # Install Husky hooks (runs automatically after install)
 
 ## Development Workflow
 
-1. **Before making changes**: Run `pnpm dev` to start the development server
+1. **Before making changes**: Run `pnpm dev` (all packages) or `pnpm dev:web` (web only) to start the development server
 2. **After making changes**: Always run `pnpm lint:fix`, `pnpm format:fix`, and `pnpm typecheck`
 3. **For commits**: Use conventional commit format (see Commit Standards below)
 4. **Before pushing**: Ensure all code quality checks pass
+
+### Desktop App Development
+- The desktop app requires the web app to be built first: `pnpm build` then `cd apps/desktop && pnpm dev`
+- Tauri uses Rust, so ensure Rust toolchain is installed for desktop app development
+- Desktop app build outputs are in `apps/desktop/src-tauri/target/`
 
 ## Key Technologies
 
@@ -88,6 +94,7 @@ The editor uses Tiptap extensions located in `packages/headless/src/extensions/`
 ### AI Endpoints (`apps/web/app/api/`)
 - `/api/generate` - Main AI completion endpoint with multi-model fallback
 - `/api/test-api-key` - Validates API configuration
+- `/api/upload` - File upload endpoint (images, documents)
 - `/api/debug-env` - Environment debugging (development only)
 
 ### Model Fallback Logic

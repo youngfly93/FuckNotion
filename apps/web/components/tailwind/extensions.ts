@@ -85,29 +85,39 @@ const horizontalRule = HorizontalRule.configure({
 });
 
 const starterKit = StarterKit.configure({
+  paragraph: {
+    HTMLAttributes: {
+      class: cx("mb-1"), // Reduced spacing between paragraphs for tighter layout
+    },
+  },
+  heading: {
+    HTMLAttributes: {
+      class: cx("mt-6 mb-4"), // Add spacing around headings
+    },
+  },
   bulletList: {
     HTMLAttributes: {
-      class: cx("list-disc list-outside leading-3 -mt-2"),
+      class: cx("list-disc list-outside leading-3 mb-4"),
     },
   },
   orderedList: {
     HTMLAttributes: {
-      class: cx("list-decimal list-outside leading-3 -mt-2"),
+      class: cx("list-decimal list-outside leading-3 mb-4"),
     },
   },
   listItem: {
     HTMLAttributes: {
-      class: cx("leading-normal -mb-2"),
+      class: cx("leading-normal mb-1"),
     },
   },
   blockquote: {
     HTMLAttributes: {
-      class: cx("border-l-4 border-primary"),
+      class: cx("border-l-4 border-primary mb-4 pl-4"),
     },
   },
   codeBlock: {
     HTMLAttributes: {
-      class: cx("rounded-md bg-muted text-muted-foreground border p-5 font-mono font-medium"),
+      class: cx("rounded-md bg-muted text-muted-foreground border p-5 font-mono font-medium mb-4"),
     },
   },
   code: {
@@ -169,8 +179,7 @@ const markdownExtension = MarkdownExtension.configure({
   linkify: false,
   breaks: false,
   transformCopiedText: false,
-  // Custom transform function to fix heading format
-  transformPastedText: (text: string) => fixMarkdownHeadings(text),
+  transformPastedText: false,
 });
 
 // Load autocomplete settings from localStorage with defaults
