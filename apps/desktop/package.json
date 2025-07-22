@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "dev": "tauri dev",
-    "build": "tauri build"
+    "dev": "cross-env CARGO_HOME=D:\\.cargo RUSTUP_HOME=D:\\.rustup tauri dev",
+    "build": "cross-env CARGO_HOME=D:\\.cargo RUSTUP_HOME=D:\\.rustup tauri build"
   },
   "dependencies": {
     "novel": "workspace:^"

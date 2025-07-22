@@ -7,7 +7,8 @@ import { Menu, GithubIcon } from "lucide-react";
 import { useSidebar } from "@/contexts/sidebar-context";
 import { useBackground } from "@/contexts/background-context";
 
-export default function Page() {
+// 确保这是根路由页面
+export default function HomePage() {
   const { isOpen: sidebarOpen, toggle: toggleSidebar } = useSidebar();
   const { backgroundImage } = useBackground();
 

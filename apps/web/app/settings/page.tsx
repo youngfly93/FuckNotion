@@ -2,6 +2,7 @@
 
 import { ApiKeyManager } from "@/components/api-key-manager";
 import BackgroundSettings from "@/components/background-settings";
+import DataManager from "@/components/data-manager";
 import { useBackground } from "@/contexts/background-context";
 
 export default function SettingsPage() {
@@ -18,6 +19,17 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <ApiKeyManager />
           <BackgroundSettings />
+        </div>
+
+        {/* Data Management Section */}
+        <div className="mt-8">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Data Management</h2>
+            <p className="text-gray-600 mb-4">
+              Export your data or manage storage with the new IndexedDB system.
+            </p>
+            <DataManager />
+          </div>
         </div>
 
         <div className="mt-8 text-center">

@@ -191,13 +191,25 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
     border: 1px solid #e2e8f0;
-    padding: 0.5em 1em;
+    padding: 0.125em 1em;
     text-align: left;
+    line-height: 1.2;
   }
 
   .editor-a4-layout th {
     background-color: #f7fafc;
     font-weight: 600;
+  }
+
+  /* Additional styles to reduce table cell spacing */
+  .editor-a4-layout table tr {
+    height: auto;
+  }
+
+  .editor-a4-layout table p {
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
   }
 }
 

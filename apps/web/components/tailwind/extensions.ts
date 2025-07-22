@@ -32,6 +32,7 @@ import TableCell from "@tiptap/extension-table-cell";
 import { cx } from "class-variance-authority";
 import { common, createLowlight } from "lowlight";
 import { PageReference } from "./page-reference-extension";
+import { DirectTableDrag } from "./direct-table-drag";
 
 //TODO I am using cx here to get tailwind autocomplete working, idk if someone else can write a regex to just capture the class key in objects
 const aiHighlight = AIHighlight;
@@ -85,6 +86,8 @@ const horizontalRule = HorizontalRule.configure({
 });
 
 const starterKit = StarterKit.configure({
+  // 禁用 StarterKit 中的 codeBlock，因为我们使用 CodeBlockLowlight
+  codeBlock: false,
   paragraph: {
     HTMLAttributes: {
       class: cx("mb-1"), // Reduced spacing between paragraphs for tighter layout
@@ -113,11 +116,6 @@ const starterKit = StarterKit.configure({
   blockquote: {
     HTMLAttributes: {
       class: cx("border-l-4 border-primary mb-4 pl-4"),
-    },
-  },
-  codeBlock: {
-    HTMLAttributes: {
-      class: cx("rounded-md bg-muted text-muted-foreground border p-5 font-mono font-medium mb-4"),
     },
   },
   code: {
@@ -227,13 +225,13 @@ const tableRow = TableRow.configure({
 
 const tableHeader = TableHeader.configure({
   HTMLAttributes: {
-    class: "border border-gray-300 bg-gray-50 px-4 py-2 text-left font-semibold",
+    class: "border border-gray-300 bg-gray-50 px-4 py-0.5 text-left font-semibold leading-tight",
   },
 });
 
 const tableCell = TableCell.configure({
   HTMLAttributes: {
-    class: "border border-gray-300 px-4 py-2",
+    class: "border border-gray-300 px-4 py-0.5 leading-tight",
   },
 });
 
@@ -241,7 +239,7 @@ export const defaultExtensions = [
   starterKit,
   placeholder,
   tiptapLink,
-  tiptapImage,
+  // 移除 tiptapImage，只保留 updatedImage 以避免重复
   updatedImage,
   taskList,
   taskItem,
@@ -258,11 +256,15 @@ export const defaultExtensions = [
   TextStyle,
   Color,
   CustomKeymap,
-  GlobalDragHandle,
+  GlobalDragHandle.configure({
+    // 排除表格元素，避免与表格拖拽冲突
+    excludeElements: ['table', 'td', 'th', 'tr', 'tbody', 'thead'],
+  }),
   PageReference,
   autoComplete,
   table,
   tableRow,
   tableHeader,
   tableCell,
+  DirectTableDrag,
 ];

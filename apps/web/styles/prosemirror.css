@@ -323,18 +323,20 @@ div[data-tippy-root] svg {
   margin: 1em 0;
   overflow: hidden;
   border: 1px solid #e2e8f0;
+  border-spacing: 0;
 }
 
 .ProseMirror td,
 .ProseMirror th {
   min-width: 1em;
   border: 1px solid #e2e8f0;
-  padding: 0.5em 1em;
+  padding: 0.125em 1em;
   vertical-align: top;
   box-sizing: border-box;
   position: relative;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  line-height: 1.2;
 }
 
 .ProseMirror th {
@@ -350,6 +352,45 @@ div[data-tippy-root] svg {
   left: 0; right: 0; top: 0; bottom: 0;
   background: rgba(200, 200, 255, 0.4);
   pointer-events: none;
+}
+
+/* Additional styles to reduce table cell spacing */
+.ProseMirror table tr {
+  height: auto;
+}
+
+.ProseMirror table p {
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+}
+
+/* 禁用表格默认拖拽行为 */
+.ProseMirror table {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+.ProseMirror td, .ProseMirror th {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* 隐藏表格内的全局拖拽手柄 */
+.ProseMirror table .drag-handle {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* 确保表格行不显示拖拽手柄 */
+.ProseMirror tr .drag-handle {
+  display: none !important;
 }
 
 .ProseMirror .column-resize-handle {

@@ -349,8 +349,9 @@ export async function exportToPDF(title: string, content: any, pageSlug: string)
         }
         th, td {
             border: 1px solid #e2e8f0;
-            padding: 0.5em 1em;
+            padding: 0.125em 1em;
             text-align: left;
+            line-height: 1.2;
         }
         th {
             background: #f7fafc;

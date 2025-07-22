@@ -134,6 +134,7 @@ const TailwindAdvancedEditor = ({
           initialContent={initialContent}
           extensions={extensions}
           className={`editor-a4-layout ${darkMode ? "dark" : ""} relative sm:rounded-lg`}
+          immediatelyRender={false}
           editorProps={{
             handleDOMEvents: {
               keydown: (_view, event) => handleCommandNavigation(event),
