@@ -9,24 +9,28 @@ export default function SettingsPage() {
   const { backgroundImage } = useBackground();
 
   return (
-    <div className={`min-h-screen py-12 px-4 ${!backgroundImage ? "bg-gradient-to-br from-gray-50 to-gray-100" : ""}`}>
+    <div className="neo-container min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-          <p className="text-gray-700 text-lg">Configure your AI API settings and customize your editor experience</p>
+          <h1 className="neo-heading text-4xl mb-4">SETTINGS</h1>
+          <p className="neo-text text-lg">CONFIGURE YOUR AI API SETTINGS AND CUSTOMIZE YOUR EDITOR EXPERIENCE</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <ApiKeyManager />
-          <BackgroundSettings />
+          <div className="neo-card p-6">
+            <ApiKeyManager />
+          </div>
+          <div className="neo-card p-6">
+            <BackgroundSettings />
+          </div>
         </div>
 
         {/* Data Management Section */}
         <div className="mt-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Data Management</h2>
-            <p className="text-gray-600 mb-4">
-              Export your data or manage storage with the new IndexedDB system.
+          <div className="neo-card p-6">
+            <h2 className="neo-heading text-xl mb-4">DATA MANAGEMENT</h2>
+            <p className="neo-text mb-4">
+              EXPORT YOUR DATA OR MANAGE STORAGE WITH THE NEW INDEXEDDB SYSTEM.
             </p>
             <DataManager />
           </div>
@@ -35,9 +39,9 @@ export default function SettingsPage() {
         <div className="mt-8 text-center">
           <a
             href="/"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+            className="neo-button neo-button-primary inline-flex items-center px-6 py-3"
           >
-            ← Back to Editor
+            <span className="neo-text">← BACK TO EDITOR</span>
           </a>
         </div>
       </div>

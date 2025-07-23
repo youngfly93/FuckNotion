@@ -379,8 +379,8 @@ export default function DynamicPageClient() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="neo-container flex min-h-screen items-center justify-center">
+        <div className="neo-spinner"></div>
       </div>
     );
   }
@@ -388,20 +388,23 @@ export default function DynamicPageClient() {
   // 显示 404 页面
   if (pageNotFound) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <div className="text-center">
-          <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-          <p className="text-xl text-gray-600 mb-8">页面不存在</p>
-          <p className="text-gray-500 mb-8">您访问的页面可能已被删除或从未存在。</p>
+      <div className="neo-container flex min-h-screen items-center justify-center">
+        <div className="neo-card text-center p-12">
+          <h1 className="neo-heading text-8xl mb-6 text-red-500">404</h1>
+          <p className="neo-text text-2xl mb-6">页面不存在</p>
+          <p className="neo-text text-lg mb-8">您访问的页面可能已被删除或从未存在。</p>
           <div className="flex gap-4 justify-center">
             <Link href="/">
-              <Button>返回首页</Button>
+              <Button className="neo-button neo-button-primary">
+                <span className="neo-text">返回首页</span>
+              </Button>
             </Link>
-            <Button 
+            <Button
               variant="outline"
               onClick={() => router.back()}
+              className="neo-button"
             >
-              返回上一页
+              <span className="neo-text">返回上一页</span>
             </Button>
           </div>
         </div>
@@ -410,7 +413,8 @@ export default function DynamicPageClient() {
   }
 
   return (
-    <div className={`flex min-h-screen ${!backgroundImage ? "bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50" : ""}`}>
+    <div className="neo-container flex min-h-screen"
+    >
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
@@ -419,10 +423,11 @@ export default function DynamicPageClient() {
         className={`flex-1 flex flex-col items-center gap-1 py-2 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : ""}`}
       >
         {/* Header */}
-        <div className={`flex flex-col w-full max-w-4xl gap-1 mb-1 ${sidebarOpen ? "px-4" : "px-4 sm:px-5"}`}>
+        <div className="neo-header flex flex-col w-full gap-2 mb-4 px-4 py-3"
+        >
           {/* Top row with menu and actions */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={toggleSidebar} className="gap-2">
+            <Button variant="ghost" size="sm" onClick={toggleSidebar} className="neo-button gap-2 text-white border-white hover:bg-white hover:text-black">
               <Menu className="h-4 w-4" />
             </Button>
 
@@ -430,14 +435,14 @@ export default function DynamicPageClient() {
 
             <div className="flex items-center gap-2">
               <ExportMenu title={title} content={pageData?.content} pageSlug={slug} />
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="neo-button gap-2 text-white border-white hover:bg-white hover:text-black">
                 <Share className="h-4 w-4" />
-                Share
+                <span className="neo-text">Share</span>
               </Button>
               <Link href="/settings">
-                <Button variant="ghost" size="sm" className="gap-2">
+                <Button variant="ghost" size="sm" className="neo-button gap-2 text-white border-white hover:bg-white hover:text-black">
                   <Settings className="h-4 w-4" />
-                  Settings
+                  <span className="neo-text">Settings</span>
                 </Button>
               </Link>
             </div>
@@ -445,15 +450,15 @@ export default function DynamicPageClient() {
 
           {/* Breadcrumb navigation for sub pages */}
           {pageData?.isSubPage && parentPage && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+            <div className="flex items-center gap-2 text-sm text-white mb-2">
               <Link
                 href={pageData.parentSlug ? `/page/${pageData.parentSlug}` : "/"}
-                className="hover:text-gray-900 transition-colors"
+                className="neo-text hover:text-yellow-400 transition-colors font-bold"
               >
                 {parentPage.title || "Untitled"}
               </Link>
               <ChevronRight className="h-4 w-4" />
-              <span className="text-gray-900">{title || "Untitled"}</span>
+              <span className="neo-text text-yellow-400 font-bold">{title || "Untitled"}</span>
             </div>
           )}
 
@@ -463,8 +468,8 @@ export default function DynamicPageClient() {
               type="text"
               value={title}
               onChange={(e) => handleTitleChange(e.target.value)}
-              className="text-3xl font-bold bg-transparent border-none outline-none text-center placeholder-gray-400 max-w-2xl w-full"
-              placeholder="Untitled Page"
+              className="neo-heading text-3xl bg-transparent border-none outline-none text-center placeholder-gray-400 max-w-2xl w-full text-white"
+              placeholder="UNTITLED PAGE"
               autoFocus={isNewPage}
             />
           </div>

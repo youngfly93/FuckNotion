@@ -128,12 +128,12 @@ const TailwindAdvancedEditor = ({
   if (!initialContent) return null;
 
   return (
-    <div className={`relative w-full ${darkMode ? "dark" : ""}`}>
+    <div className={`neo-card relative w-full max-w-4xl mx-auto ${darkMode ? "dark" : ""}`}>
       <EditorRoot>
         <EditorContent
           initialContent={initialContent}
           extensions={extensions}
-          className={`editor-a4-layout ${darkMode ? "dark" : ""} relative sm:rounded-lg`}
+          className={`editor-a4-layout ${darkMode ? "dark" : ""} relative border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
           immediatelyRender={false}
           editorProps={{
             handleDOMEvents: {
@@ -158,14 +158,14 @@ const TailwindAdvancedEditor = ({
             </>
           }
         >
-          <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
+          <EditorCommand className="neo-card z-50 h-auto max-h-[330px] overflow-y-auto px-3 py-3 transition-all">
             <EditorCommandEmpty className="px-2 text-muted-foreground">No results</EditorCommandEmpty>
             <EditorCommandList>
               {suggestionItems.map((item) => (
                 <EditorCommandItem
                   value={item.title}
                   onCommand={(val) => item.command(val)}
-                  className="flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm hover:bg-accent aria-selected:bg-accent"
+                  className="neo-button flex w-full items-center space-x-2 px-3 py-2 text-left text-sm mb-1 last:mb-0"
                   key={item.title}
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-md border border-muted bg-background">

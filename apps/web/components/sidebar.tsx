@@ -248,42 +248,40 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
       {/* Sidebar */}
       <div
-        className={`
-        fixed top-0 left-0 h-full border-r border-gray-200 z-50 transition-all duration-300 ease-in-out
+        className={`neo-sidebar
+        fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
         w-64 flex flex-col
-        ${backgroundImage 
-          ? "bg-white/70 backdrop-blur-md border-white/30" 
-          : "bg-gray-50"
-        }
       `}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between p-4 transition-colors duration-300 ${
-          backgroundImage
-            ? "border-b border-white/30 bg-white/50"
-            : "border-b border-gray-200"
-        }`}>
+        <div className="neo-header flex items-center justify-between p-4"
+        >
           <div className="flex items-center gap-2">
             <img
               src="/logo.png"
               alt="FuckNotion Logo"
               className="h-8 w-8 rounded-md object-cover"
             />
-            <span className="font-semibold text-gray-900">FuckNotion</span>
+            <span className="neo-heading text-white">FUCKNOTION</span>
           </div>
-          <Button variant="ghost" size="sm" onClick={onToggle} className="lg:hidden">
+          <Button variant="ghost" size="sm" onClick={onToggle} className="neo-button lg:hidden text-white border-white hover:bg-white hover:text-black">
             <X className="h-4 w-4" />
           </Button>
         </div>
 
         {/* Navigation */}
-        <div id="sidebar-content" className="flex-1 overflow-y-auto p-4 space-y-2" tabIndex={-1}>
+        <div id="sidebar-content" className="flex-1 overflow-y-auto p-4 space-y-3 bg-white" tabIndex={-1}>
           {/* Home */}
           <Link href="/">
-            <Button variant={isCurrentPage("/") ? "secondary" : "ghost"} className="w-full justify-start gap-3">
+            <Button
+              variant="ghost"
+              className={`neo-button w-full justify-start gap-3 ${
+                isCurrentPage("/") ? "neo-button-primary" : ""
+              }`}
+            >
               <Home className="h-4 w-4" />
-              主页
+              <span className="neo-text">主页</span>
             </Button>
           </Link>
 
@@ -296,18 +294,15 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
               return (
                 <div key={slug} className="space-y-1">
                   {/* Parent Page */}
-                  <div className={`group flex items-center justify-between rounded-md transition-colors duration-150 px-0 py-1 ${
-                    backgroundImage 
-                      ? "hover:bg-white/50" 
-                      : "hover:bg-gray-100"
-                  }`}>
+                  <div className="neo-page-item group flex items-center justify-between px-2 py-2"
+                  >
                     <div className="flex items-center flex-1">
                       {/* Collapse/Expand Button */}
                       {hasSubPages && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 hover:bg-gray-200 mr-1"
+                          className="neo-button h-6 w-6 p-0 mr-1 bg-transparent border-2 border-black"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -320,12 +315,10 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                       {/* Page Link */}
                       <Link href={`/page/${slug}`} className="flex-1">
                         <Button
-                          variant={isCurrentPage(`/page/${slug}`) ? "secondary" : "ghost"}
-                          className={`w-full justify-start gap-3 ${hasSubPages ? "ml-0" : "ml-6"} ${selectedPageSlug === slug ? "ring-2 ring-blue-500" : ""} hover:bg-transparent ${
-                            backgroundImage 
-                              ? "group-hover:bg-white/30" 
-                              : "group-hover:bg-gray-50"
-                          }`}
+                          variant="ghost"
+                          className={`neo-button w-full justify-start gap-3 ${hasSubPages ? "ml-0" : "ml-6"} ${
+                            isCurrentPage(`/page/${slug}`) ? "neo-button-primary" : ""
+                          } ${selectedPageSlug === slug ? "ring-4 ring-yellow-400" : ""} bg-transparent border-0`}
                           onClick={(e) => {
                             setSelectedPageSlug(slug);
                             // Ensure the sidebar content has focus for keyboard events
@@ -363,24 +356,18 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
                   {/* Sub Pages */}
                   {hasSubPages && !isCollapsed && (
-                    <div className="ml-10 space-y-1">
+                    <div className="ml-8 space-y-2">
                       {subPagesByParent[slug].map(([subSlug, subPage]) => (
                         <div
                           key={subSlug}
-                          className={`group flex items-center justify-between rounded-md transition-colors duration-150 px-1 py-1 ${
-                            backgroundImage 
-                              ? "hover:bg-white/50" 
-                              : "hover:bg-gray-100"
-                          }`}
+                          className="neo-subpage-item group flex items-center justify-between px-2 py-1"
                         >
                           <Link href={`/page/${subSlug}`} className="flex-1">
                             <Button
-                              variant={isCurrentPage(`/page/${subSlug}`) ? "secondary" : "ghost"}
-                              className={`w-full justify-start gap-3 text-sm ${selectedPageSlug === subSlug ? "ring-2 ring-blue-500" : ""} hover:bg-transparent ${
-                                backgroundImage 
-                                  ? "group-hover:bg-white/30" 
-                                  : "group-hover:bg-gray-50"
-                              }`}
+                              variant="ghost"
+                              className={`neo-button w-full justify-start gap-3 text-sm ${
+                                isCurrentPage(`/page/${subSlug}`) ? "neo-button-success" : ""
+                              } ${selectedPageSlug === subSlug ? "ring-4 ring-yellow-400" : ""} bg-transparent border-0`}
                               size="sm"
                               onClick={(e) => {
                                 setSelectedPageSlug(subSlug);
@@ -426,11 +413,11 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
             <Button
               variant="ghost"
-              className="w-full justify-start gap-3 text-gray-500 hover:text-gray-700 mt-2"
+              className="neo-button neo-button-success w-full justify-start gap-3 mt-4"
               onClick={createNewPage}
             >
               <Plus className="h-4 w-4" />
-              添加页面
+              <span className="neo-text">添加页面</span>
             </Button>
           </div>
         </div>
@@ -442,9 +429,9 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
             : "border-t border-gray-200"
         }`}>
           <Link href="/settings">
-            <Button variant="ghost" className="w-full justify-start gap-3">
+            <Button variant="ghost" className="neo-button w-full justify-start gap-3">
               <Settings className="h-4 w-4" />
-              设置
+              <span className="neo-text">设置</span>
             </Button>
           </Link>
         </div>

@@ -58,14 +58,15 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="neo-container flex min-h-screen items-center justify-center">
+        <div className="neo-spinner"></div>
       </div>
     );
   }
 
   return (
-    <div className={`flex min-h-screen ${!backgroundImage ? "bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50" : ""}`}>
+    <div className="neo-container flex min-h-screen"
+    >
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
@@ -73,8 +74,9 @@ export default function HomePage() {
       <div
         className={`flex-1 flex flex-col items-center gap-1 py-2 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : ""}`}
       >
-        <div className={`flex w-full max-w-4xl items-center gap-2 mb-1 ${sidebarOpen ? "px-4" : "px-4 sm:px-5"}`}>
-          <Button variant="ghost" size="sm" onClick={toggleSidebar} className="gap-2">
+        <div className="neo-header flex w-full items-center gap-2 mb-4 px-4 py-3"
+        >
+          <Button variant="ghost" size="sm" onClick={toggleSidebar} className="neo-button gap-2 text-white border-white hover:bg-white hover:text-black">
             <Menu className="h-4 w-4" />
           </Button>
 
@@ -84,10 +86,10 @@ export default function HomePage() {
               alt="FuckNotion Logo"
               className="h-6 w-6 rounded-md object-cover"
             />
-            <span className="font-semibold text-gray-900">FuckNotion</span>
+            <span className="neo-heading text-white">FUCKNOTION</span>
           </div>
 
-          <Button size="icon" variant="outline" className="ml-auto">
+          <Button size="icon" variant="outline" className="neo-button ml-auto text-white border-white hover:bg-white hover:text-black">
             <a href="https://github.com/youngfly93/FuckNotion" target="_blank" rel="noreferrer">
               <GithubIcon />
             </a>

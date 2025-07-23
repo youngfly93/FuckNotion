@@ -47,19 +47,19 @@ export default function ExportMenu({ title, content, pageSlug }: ExportMenuProps
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2" disabled={isExporting}>
+        <Button variant="ghost" size="sm" className="neo-button gap-2 text-white border-white hover:bg-white hover:text-black" disabled={isExporting}>
           <Download className="h-4 w-4" />
-          {isExporting ? "导出中..." : "导出"}
+          <span className="neo-text">{isExporting ? "导出中..." : "导出"}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={handleExportMarkdown} disabled={isExporting}>
+      <DropdownMenuContent align="end" className="neo-card p-2">
+        <DropdownMenuItem onClick={handleExportMarkdown} disabled={isExporting} className="neo-button mb-1 last:mb-0">
           <FileText className="h-4 w-4 mr-2" />
-          导出为 Markdown
+          <span className="neo-text">导出为 MARKDOWN</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleExportPDF} disabled={isExporting}>
+        <DropdownMenuItem onClick={handleExportPDF} disabled={isExporting} className="neo-button mb-1 last:mb-0">
           <File className="h-4 w-4 mr-2" />
-          导出为 PDF
+          <span className="neo-text">导出为 PDF</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
