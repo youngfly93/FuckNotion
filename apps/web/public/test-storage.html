@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuckNotion Storage Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .warning { border-left-color: #ffc107; background: #fff3cd; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        pre {
+            background: #f1f3f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .data-display {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 FuckNotion Storage Test</h1>
+    <p>这个页面会实时测试 FuckNotion 的存储系统，验证是否正在使用 IndexedDB。</p>
+
+    <div class="test-section">
+        <h2>📊 实时存储测试</h2>
+        <button onclick="testWrite()">✍️ 写入测试数据</button>
+        <button onclick="testRead()">📖 读取数据</button>
+        <button onclick="testIndexedDB()">💾 检查 IndexedDB</button>
+        <button onclick="testLocalStorage()">📦 检查 localStorage</button>
+        <button onclick="clearAll()">🧹 清空所有数据</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function addResult(type, title, content) {
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<h3>${title}</h3><div>${content}</div>`;
+            results.appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearResults() {
+            results.innerHTML = '';
+        }
+
+        // 测试写入数据
+        async function testWrite() {
+            clearResults();
+            addResult('', '✍️ 开始写入测试', '正在写入测试数据到存储系统...');
+
+            try {
+                // 模拟页面数据
+                const testPageData = {
+                    title: `测试页面 ${new Date().toLocaleTimeString()}`,
+                    content: {
+                        type: 'doc',
+                        content: [
+                            {
+                                type: 'paragraph',
+                                content: [
+                                    { type: 'text', text: `这是一个测试页面，创建时间：${new Date().toLocaleString()}` }
+                                ]
+                            }
+                        ]
+                    }
+                };
+
+                // 尝试写入 IndexedDB
+                const request = indexedDB.open('FuckNotionDB', 1);
+                
+                request.onsuccess = function(event) {
+                    const db = event.target.result;
+                    const transaction = db.transaction(['pages'], 'readwrite');
+                    const store = transaction.objectStore('pages');
+                    
+                    const pageData = {
+                        slug: 'test-page-' + Date.now(),
+                        title: testPageData.title,
+                        content: testPageData.content,
+                        textContent: testPageData.title,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    };
+                    
+                    const addRequest = store.add(pageData);
+                    
+                    addRequest.onsuccess = function() {
+                        addResult('success', '✅ IndexedDB 写入成功', `
+                            <p>成功写入数据到 IndexedDB！</p>
+                            <pre>${JSON.stringify(pageData, null, 2)}</pre>
+                        `);
+                    };
+                    
+                    addRequest.onerror = function(e) {
+                        addResult('error', '❌ IndexedDB 写入失败', `错误：${e.target.error}`);
+                    };
+                };
+                
+                request.onerror = function(e) {
+                    addResult('error', '❌ 无法打开 IndexedDB', `错误：${e.target.error}`);
+                };
+
+            } catch (error) {
+                addResult('error', '❌ 写入测试失败', `错误：${error.message}`);
+            }
+        }
+
+        // 测试读取数据
+        async function testRead() {
+            clearResults();
+            addResult('', '📖 开始读取测试', '正在从存储系统读取数据...');
+
+            try {
+                const request = indexedDB.open('FuckNotionDB', 1);
+                
+                request.onsuccess = function(event) {
+                    const db = event.target.result;
+                    const transaction = db.transaction(['pages'], 'readonly');
+                    const store = transaction.objectStore('pages');
+                    const getAllRequest = store.getAll();
+                    
+                    getAllRequest.onsuccess = function() {
+                        const pages = getAllRequest.result;
+                        
+                        if (pages.length > 0) {
+                            addResult('success', `✅ IndexedDB 读取成功`, `
+                                <p>找到 ${pages.length} 个页面：</p>
+                                <div class="data-display">
+                                    ${pages.map(page => `
+                                        <div style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                            <strong>${page.title}</strong><br>
+                                            <small>Slug: ${page.slug}</small><br>
+                                            <small>创建时间: ${new Date(page.createdAt).toLocaleString()}</small><br>
+                                            <small>更新时间: ${new Date(page.updatedAt).toLocaleString()}</small>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `);
+                        } else {
+                            addResult('warning', '⚠️ IndexedDB 为空', 'IndexedDB 中没有找到任何页面数据');
+                        }
+                    };
+                    
+                    getAllRequest.onerror = function(e) {
+                        addResult('error', '❌ 读取失败', `错误：${e.target.error}`);
+                    };
+                };
+                
+                request.onerror = function(e) {
+                    addResult('error', '❌ 无法打开 IndexedDB', `错误：${e.target.error}`);
+                };
+
+            } catch (error) {
+                addResult('error', '❌ 读取测试失败', `错误：${error.message}`);
+            }
+        }
+
+        // 检查 IndexedDB 状态
+        async function testIndexedDB() {
+            clearResults();
+            addResult('', '💾 检查 IndexedDB', '正在检查 IndexedDB 数据库状态...');
+
+            if (!('indexedDB' in window)) {
+                addResult('error', '❌ IndexedDB 不支持', '当前浏览器不支持 IndexedDB');
+                return;
+            }
+
+            try {
+                // 检查数据库是否存在
+                const request = indexedDB.open('FuckNotionDB');
+                
+                request.onsuccess = function(event) {
+                    const db = event.target.result;
+                    
+                    addResult('success', '✅ IndexedDB 数据库存在', `
+                        <ul>
+                            <li>数据库名称: ${db.name}</li>
+                            <li>版本: ${db.version}</li>
+                            <li>对象存储: ${Array.from(db.objectStoreNames).join(', ')}</li>
+                        </ul>
+                    `);
+
+                    // 检查各表的数据量
+                    const transaction = db.transaction(db.objectStoreNames, 'readonly');
+                    
+                    Array.from(db.objectStoreNames).forEach(storeName => {
+                        const store = transaction.objectStore(storeName);
+                        const countRequest = store.count();
+                        
+                        countRequest.onsuccess = function() {
+                            addResult('', `📊 ${storeName} 表`, `包含 ${countRequest.result} 条记录`);
+                        };
+                    });
+
+                    db.close();
+                };
+                
+                request.onerror = function(e) {
+                    addResult('error', '❌ IndexedDB 连接失败', `错误：${e.target.error}`);
+                };
+
+            } catch (error) {
+                addResult('error', '❌ IndexedDB 检查失败', `错误：${error.message}`);
+            }
+        }
+
+        // 检查 localStorage
+        function testLocalStorage() {
+            clearResults();
+            addResult('', '📦 检查 localStorage', '正在检查 localStorage 中的数据...');
+
+            try {
+                const relevantKeys = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.includes('novel') || key.includes('notion') || key.includes('fuck'))) {
+                        relevantKeys.push(key);
+                    }
+                }
+
+                if (relevantKeys.length > 0) {
+                    addResult('warning', '⚠️ 发现 localStorage 数据', `
+                        <p>在 localStorage 中发现 ${relevantKeys.length} 个相关项目：</p>
+                        <ul>
+                            ${relevantKeys.map(key => {
+                                const value = localStorage.getItem(key);
+                                const size = new Blob([value]).size;
+                                return `<li><strong>${key}</strong> (${(size/1024).toFixed(2)} KB)</li>`;
+                            }).join('')}
+                        </ul>
+                        <p><small>这可能表示数据还在使用 localStorage 或者迁移未完成</small></p>
+                    `);
+                } else {
+                    addResult('success', '✅ localStorage 已清理', '没有发现相关的 localStorage 数据，说明已成功迁移到 IndexedDB');
+                }
+
+            } catch (error) {
+                addResult('error', '❌ localStorage 检查失败', `错误：${error.message}`);
+            }
+        }
+
+        // 清空所有数据
+        async function clearAll() {
+            if (!confirm('确定要清空所有存储数据吗？这个操作不可撤销！')) {
+                return;
+            }
+
+            clearResults();
+            addResult('warning', '🧹 清空所有数据', '正在清空 IndexedDB 和 localStorage...');
+
+            try {
+                // 清空 IndexedDB
+                const deleteRequest = indexedDB.deleteDatabase('FuckNotionDB');
+                
+                deleteRequest.onsuccess = function() {
+                    addResult('success', '✅ IndexedDB 已清空', 'FuckNotionDB 数据库已删除');
+                };
+                
+                deleteRequest.onerror = function(e) {
+                    addResult('error', '❌ IndexedDB 清空失败', `错误：${e.target.error}`);
+                };
+
+                // 清空相关的 localStorage
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.includes('novel') || key.includes('notion') || key.includes('fuck'))) {
+                        keysToRemove.push(key);
+                    }
+                }
+
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                
+                if (keysToRemove.length > 0) {
+                    addResult('success', '✅ localStorage 已清空', `删除了 ${keysToRemove.length} 个项目`);
+                }
+
+            } catch (error) {
+                addResult('error', '❌ 清空失败', `错误：${error.message}`);
+            }
+        }
+
+        // 页面加载时自动检查
+        window.addEventListener('load', function() {
+            addResult('', '🚀 存储测试工具已加载', '点击上方按钮开始测试存储系统');
+        });
+    </script>
+</body>
+</html>

@@ -54,7 +54,8 @@
     "tippy.js": "^6.3.7",
     "ts-pattern": "^5.0.8",
     "typescript": "^5.4.2",
-    "use-debounce": "^10.0.0"
+    "use-debounce": "^10.0.0",
+    "prosemirror-state": "^1.4.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.7.2",

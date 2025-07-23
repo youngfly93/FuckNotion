@@ -16,6 +16,7 @@ interface PageData {
   updatedAt: string;
   parentSlug?: string;
   isSubPage?: boolean;
+  hideFromSidebar?: boolean;
 }
 
 interface PagesList {
@@ -46,7 +47,8 @@ export default function PagesListPage() {
       const timestamp = Date.now();
       const slug = `untitled-${timestamp}`;
 
-      router.push(`/page/${slug}`);
+      // 添加 ?new=true 参数来创建新页面
+      router.push(`/page/${slug}?new=true`);
     } catch (error) {
       console.error("创建页面时出错:", error);
       alert("创建页面失败，请重试");

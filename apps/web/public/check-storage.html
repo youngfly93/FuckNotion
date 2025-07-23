@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuckNotion Storage Checker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .storage-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 FuckNotion Storage Checker</h1>
+    <p>这个工具帮助你检查 FuckNotion 的存储状态和数据迁移情况。</p>
+
+    <div id="results"></div>
+
+    <div>
+        <button onclick="checkStorage()">🔍 检查存储状态</button>
+        <button onclick="checkIndexedDB()">💾 检查 IndexedDB</button>
+        <button onclick="checkLocalStorage()">📦 检查 localStorage</button>
+        <button onclick="checkMigration()">🔄 检查迁移状态</button>
+        <button onclick="clearResults()">🧹 清空结果</button>
+    </div>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function addResult(type, title, content) {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<h3>${title}</h3><div>${content}</div>`;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            results.innerHTML = '';
+        }
+
+        async function checkStorage() {
+            clearResults();
+            addResult('info', '🔍 开始检查存储状态...', '正在分析当前的存储配置');
+
+            // 检查浏览器支持
+            const support = {
+                indexedDB: 'indexedDB' in window,
+                localStorage: 'localStorage' in window,
+                storageEstimate: 'storage' in navigator && 'estimate' in navigator.storage,
+                persistentStorage: 'storage' in navigator && 'persist' in navigator.storage
+            };
+
+            addResult('info', '🌐 浏览器支持情况', `
+                <ul>
+                    <li>IndexedDB: ${support.indexedDB ? '✅ 支持' : '❌ 不支持'}</li>
+                    <li>localStorage: ${support.localStorage ? '✅ 支持' : '❌ 不支持'}</li>
+                    <li>Storage Estimate API: ${support.storageEstimate ? '✅ 支持' : '❌ 不支持'}</li>
+                    <li>Persistent Storage: ${support.persistentStorage ? '✅ 支持' : '❌ 不支持'}</li>
+                </ul>
+            `);
+
+            // 检查存储配额
+            if (support.storageEstimate) {
+                try {
+                    const estimate = await navigator.storage.estimate();
+                    const usedMB = (estimate.usage / 1024 / 1024).toFixed(2);
+                    const quotaMB = (estimate.quota / 1024 / 1024).toFixed(2);
+                    const percentUsed = ((estimate.usage / estimate.quota) * 100).toFixed(2);
+
+                    addResult('success', '💾 存储配额信息', `
+                        <ul>
+                            <li>已使用: ${usedMB} MB</li>
+                            <li>总配额: ${quotaMB} MB</li>
+                            <li>使用率: ${percentUsed}%</li>
+                        </ul>
+                    `);
+                } catch (error) {
+                    addResult('error', '❌ 获取存储配额失败', error.message);
+                }
+            }
+
+            // 检查持久存储
+            if (support.persistentStorage) {
+                try {
+                    const isPersistent = await navigator.storage.persisted();
+                    addResult(isPersistent ? 'success' : 'warning', 
+                        '🔒 持久存储状态', 
+                        isPersistent ? '✅ 已启用持久存储' : '⚠️ 未启用持久存储（数据可能被清理）'
+                    );
+                } catch (error) {
+                    addResult('error', '❌ 检查持久存储失败', error.message);
+                }
+            }
+        }
+
+        async function checkIndexedDB() {
+            if (!('indexedDB' in window)) {
+                addResult('error', '❌ IndexedDB 不支持', '当前浏览器不支持 IndexedDB');
+                return;
+            }
+
+            try {
+                // 尝试打开 FuckNotionDB
+                const request = indexedDB.open('FuckNotionDB');
+                
+                request.onsuccess = async function(event) {
+                    const db = event.target.result;
+                    
+                    addResult('success', '✅ IndexedDB 连接成功', `
+                        <ul>
+                            <li>数据库名称: ${db.name}</li>
+                            <li>版本: ${db.version}</li>
+                            <li>对象存储: ${Array.from(db.objectStoreNames).join(', ')}</li>
+                        </ul>
+                    `);
+
+                    // 检查各个表的数据
+                    const transaction = db.transaction(['pages', 'settings'], 'readonly');
+                    
+                    // 检查页面数据
+                    const pagesStore = transaction.objectStore('pages');
+                    const pagesRequest = pagesStore.count();
+                    
+                    pagesRequest.onsuccess = function() {
+                        addResult('info', '📄 页面数据', `共有 ${pagesRequest.result} 个页面存储在 IndexedDB 中`);
+                    };
+
+                    // 检查设置数据
+                    const settingsStore = transaction.objectStore('settings');
+                    const settingsRequest = settingsStore.getAll();
+                    
+                    settingsRequest.onsuccess = function() {
+                        const settings = settingsRequest.result;
+                        addResult('info', '⚙️ 设置数据', `
+                            <div>共有 ${settings.length} 个设置项：</div>
+                            <ul>
+                                ${settings.map(s => `<li><strong>${s.key}</strong>: ${JSON.stringify(s.value)}</li>`).join('')}
+                            </ul>
+                        `);
+                    };
+
+                    db.close();
+                };
+
+                request.onerror = function(event) {
+                    addResult('error', '❌ IndexedDB 连接失败', event.target.error);
+                };
+
+                request.onupgradeneeded = function(event) {
+                    addResult('warning', '⚠️ IndexedDB 需要升级', '数据库结构需要更新');
+                };
+
+            } catch (error) {
+                addResult('error', '❌ IndexedDB 检查失败', error.message);
+            }
+        }
+
+        function checkLocalStorage() {
+            if (!('localStorage' in window)) {
+                addResult('error', '❌ localStorage 不支持', '当前浏览器不支持 localStorage');
+                return;
+            }
+
+            try {
+                const items = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.includes('novel') || key.includes('notion') || key.includes('fuck'))) {
+                        const value = localStorage.getItem(key);
+                        const size = new Blob([value]).size;
+                        items.push({
+                            key,
+                            size: (size / 1024).toFixed(2) + ' KB',
+                            preview: value.length > 100 ? value.substring(0, 100) + '...' : value
+                        });
+                    }
+                }
+
+                if (items.length > 0) {
+                    addResult('info', '📦 localStorage 相关数据', `
+                        <div>找到 ${items.length} 个相关项目：</div>
+                        ${items.map(item => `
+                            <div class="storage-item">
+                                <strong>${item.key}</strong> (${item.size})<br>
+                                <small>${item.preview}</small>
+                            </div>
+                        `).join('')}
+                    `);
+                } else {
+                    addResult('success', '✅ localStorage 清理完成', '没有找到旧的 localStorage 数据，说明迁移已完成');
+                }
+
+            } catch (error) {
+                addResult('error', '❌ localStorage 检查失败', error.message);
+            }
+        }
+
+        async function checkMigration() {
+            addResult('info', '🔄 检查迁移状态...', '正在分析数据迁移情况');
+
+            // 检查是否有旧数据
+            const hasOldData = localStorage.getItem('novel-pages') || 
+                              localStorage.getItem('novel-settings') ||
+                              localStorage.getItem('pages');
+
+            if (hasOldData) {
+                addResult('warning', '⚠️ 发现旧数据', '在 localStorage 中发现旧数据，可能需要迁移');
+            } else {
+                addResult('success', '✅ 无旧数据', 'localStorage 中没有发现需要迁移的旧数据');
+            }
+
+            // 检查 IndexedDB 中是否有数据
+            await checkIndexedDB();
+        }
+
+        // 页面加载时自动检查
+        window.addEventListener('load', function() {
+            addResult('info', '🚀 FuckNotion Storage Checker', '页面已加载，点击按钮开始检查存储状态');
+        });
+    </script>
+</body>
+</html>

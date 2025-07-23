@@ -7,6 +7,7 @@ import { Home, FileText, Plus, Settings, X, ChevronDown, ChevronRight } from "lu
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useBackground } from "@/contexts/background-context";
+import { usePages } from "@/hooks/use-pages";
 
 interface PageData {
   title: string;
@@ -15,6 +16,7 @@ interface PageData {
   updatedAt: string;
   parentSlug?: string;
   isSubPage?: boolean;
+  hideFromSidebar?: boolean;
 }
 
 interface PagesList {
@@ -30,12 +32,51 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { backgroundImage } = useBackground();
-  const [pages, setPages] = useState<PagesList>({});
+  // 使用 IndexedDB 存储系统
+  const { pages: indexedDBPages, deletePage: deletePageFromDB, isLoading } = usePages();
+  // 初始化为空集合，这样所有页面默认都是展开的
   const [collapsedPages, setCollapsedPages] = useState<Set<string>>(new Set());
   const [selectedPageSlug, setSelectedPageSlug] = useState<string | null>(null);
 
+  // 将 IndexedDB 的页面数据转换为兼容的格式
+  const pages: PagesList = {};
+  console.log('IndexedDB pages count:', Object.keys(indexedDBPages).length);
+  console.log('IndexedDB pages:', indexedDBPages);
+
+  // 验证IndexedDB是否真正在使用
+  if (typeof window !== 'undefined') {
+    (window as any).verifyIndexedDB = async () => {
+      try {
+        const { db } = await import('@/lib/db/database');
+        const allPages = await db.pages.toArray();
+        console.log('Direct IndexedDB query result:', allPages);
+
+        // 检查localStorage中是否还有数据
+        const localStoragePages = localStorage.getItem('novel-pages');
+        console.log('localStorage pages:', localStoragePages ? JSON.parse(localStoragePages) : 'No data');
+
+        return { indexedDB: allPages, localStorage: localStoragePages };
+      } catch (error) {
+        console.error('Error verifying IndexedDB:', error);
+        return { error };
+      }
+    };
+  }
+  
+  Object.values(indexedDBPages).forEach((page) => {
+    pages[page.slug] = {
+      title: page.title,
+      content: page.content,
+      createdAt: page.createdAt.toISOString(),
+      updatedAt: page.updatedAt.toISOString(),
+      parentSlug: page.parentSlug,
+      isSubPage: page.isSubPage,
+      hideFromSidebar: page.hideFromSidebar,
+    };
+  });
+
   const deletePage = useCallback(
-    (slug: string, e?: React.MouseEvent | React.KeyboardEvent) => {
+    async (slug: string, e?: React.MouseEvent | React.KeyboardEvent) => {
       console.log("deletePage called with slug:", slug);
       if (e) {
         e.preventDefault();
@@ -43,10 +84,8 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       }
 
       try {
-        const updatedPages = { ...pages };
-        delete updatedPages[slug];
-        localStorage.setItem("novel-pages", JSON.stringify(updatedPages));
-        setPages(updatedPages);
+        // 使用 IndexedDB 删除页面
+        await deletePageFromDB(slug);
 
         // If currently on the deleted page, redirect to home
         if (pathname === `/page/${slug}`) {
@@ -62,40 +101,23 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         console.error("删除页面失败");
       }
     },
-    [pages, pathname, router],
+    [deletePageFromDB, pathname, router],
   );
 
   useEffect(() => {
-    const loadPages = () => {
-      const savedPages = localStorage.getItem("novel-pages");
-      if (savedPages) {
-        setPages(JSON.parse(savedPages));
-      }
-    };
-
-    const loadCollapsedState = () => {
-      const savedCollapsedState = localStorage.getItem("novel-collapsed-pages");
-      if (savedCollapsedState) {
-        setCollapsedPages(new Set(JSON.parse(savedCollapsedState)));
-      }
-    };
-
-    loadPages();
-    loadCollapsedState();
-
-    // Listen for storage changes to update pages list
-    const handleStorageChange = () => {
-      loadPages();
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    // Also check periodically for changes from the same tab
-    const interval = setInterval(loadPages, 1000);
+    // 清除之前保存的折叠状态，确保所有页面默认展开
+    localStorage.removeItem("novel-collapsed-pages");
+    
+    // 确保 collapsedPages 是空的
+    setCollapsedPages(new Set());
+    
+    // 默认展开所有页面，不加载折叠状态
+    // 用户的手动折叠操作仍然会被保存，但刷新页面后会重置为全部展开
+    
+    // 页面数据现在通过 usePages hook 自动更新，不需要手动监听
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      clearInterval(interval);
+      // Cleanup not needed anymore
     };
   }, []);
 
@@ -138,7 +160,8 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       newCollapsedPages.add(slug);
     }
     setCollapsedPages(newCollapsedPages);
-    localStorage.setItem("novel-collapsed-pages", JSON.stringify(Array.from(newCollapsedPages)));
+    // 不再保存到 localStorage，这样刷新页面后会重置为全部展开
+    // localStorage.setItem("novel-collapsed-pages", JSON.stringify(Array.from(newCollapsedPages)));
   };
 
   const createNewPage = () => {
@@ -147,7 +170,8 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       const timestamp = Date.now();
       const slug = `untitled-${timestamp}`;
 
-      router.push(`/page/${slug}`);
+      // 添加 ?new=true 参数来创建新页面
+      router.push(`/page/${slug}?new=true`);
       // Don't close sidebar on desktop
       // onToggle is only called on mobile
     } catch (error) {
@@ -165,14 +189,30 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   // Organize pages into hierarchy
   const allPageEntries = Object.entries(pages);
 
-  // Get parent pages
+  // Get parent pages (pages that are not marked as sub pages and not hidden from sidebar)
   const parentPages = allPageEntries
-    .filter(([, page]) => !page.isSubPage)
+    .filter(([slug, page]) => {
+      // 隐藏子页面
+      if (page.isSubPage) return false;
+
+      // 隐藏标记为不在侧边栏显示的页面
+      if (page.hideFromSidebar) return false;
+
+      return true;
+    })
     .sort(([, a], [, b]) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-  // Get sub pages grouped by parent
+  // Get sub pages grouped by parent (excluding pages hidden from sidebar)
   const subPagesByParent = allPageEntries
-    .filter(([, page]) => page.isSubPage && page.parentSlug)
+    .filter(([slug, page]) => {
+      // 只显示标记为子页面且有父页面的页面
+      if (!page.isSubPage || !page.parentSlug) return false;
+
+      // 隐藏标记为不在侧边栏显示的页面
+      if (page.hideFromSidebar) return false;
+
+      return true;
+    })
     .reduce(
       (acc, [slug, page]) => {
         const parentSlug = page.parentSlug!;
@@ -189,6 +229,8 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       ([, a], [, b]) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     );
   });
+
+
 
   return (
     <>
@@ -254,7 +296,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
               return (
                 <div key={slug} className="space-y-1">
                   {/* Parent Page */}
-                  <div className={`group flex items-center justify-between rounded-md transition-colors duration-150 px-1 py-1 ${
+                  <div className={`group flex items-center justify-between rounded-md transition-colors duration-150 px-0 py-1 ${
                     backgroundImage 
                       ? "hover:bg-white/50" 
                       : "hover:bg-gray-100"
@@ -265,7 +307,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 w-7 p-0 hover:bg-gray-200"
+                          className="h-6 w-6 p-0 hover:bg-gray-200 mr-1"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -279,7 +321,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                       <Link href={`/page/${slug}`} className="flex-1">
                         <Button
                           variant={isCurrentPage(`/page/${slug}`) ? "secondary" : "ghost"}
-                          className={`w-full justify-start gap-3 ${hasSubPages ? "ml-0" : "ml-7"} ${selectedPageSlug === slug ? "ring-2 ring-blue-500" : ""} hover:bg-transparent ${
+                          className={`w-full justify-start gap-3 ${hasSubPages ? "ml-0" : "ml-6"} ${selectedPageSlug === slug ? "ring-2 ring-blue-500" : ""} hover:bg-transparent ${
                             backgroundImage 
                               ? "group-hover:bg-white/30" 
                               : "group-hover:bg-gray-50"
@@ -321,7 +363,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
                   {/* Sub Pages */}
                   {hasSubPages && !isCollapsed && (
-                    <div className="ml-7 space-y-1">
+                    <div className="ml-10 space-y-1">
                       {subPagesByParent[slug].map(([subSlug, subPage]) => (
                         <div
                           key={subSlug}
@@ -356,8 +398,10 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                                 }
                               }}
                             >
-                              <FileText className="h-3 w-3" />
-                              <span className="truncate">{subPage.title || "无标题"}</span>
+                              <div className="flex items-center">
+                                <div className="w-1 h-1 bg-gray-400 rounded-full mr-1.5"></div>
+                                <span className="truncate">{subPage.title || "无标题"}</span>
+                              </div>
                             </Button>
                           </Link>
                           <button

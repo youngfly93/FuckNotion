@@ -52,42 +52,78 @@ export const suggestionItems = createSuggestionItems([
         window.dispatchEvent(saveEvent);
       }, 100);
 
-      // Save page to localStorage
-      const savedPages = localStorage.getItem("novel-pages");
-      const pages = savedPages ? JSON.parse(savedPages) : {};
-
       // Get current page slug from URL to set as parent
       const currentPath = window.location.pathname;
-      const currentSlug = currentPath.startsWith("/page/") ? currentPath.split("/page/")[1] : null;
+      const pathParts = currentPath.split("/page/");
+      const currentSlug = pathParts.length > 1 ? pathParts[1].split("?")[0] : null; // Remove query params
+
+
 
       // Only mark as sub page if we have a valid parent (i.e., created from another page, not from home)
       const isSubPage = currentSlug !== null;
+      
 
-      pages[slug] = {
-        title: "Untitled",
-        content: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        ...(isSubPage && { parentSlug: currentSlug }), // Only add parentSlug if it's a sub page
-        ...(isSubPage && { isSubPage: true }), // Only mark as sub page if we have a parent
+      // Create page data using IndexedDB through storage manager
+      const createSubPage = async () => {
+        try {
+          // Import storage manager
+          const { storageManager } = await import('@/lib/db/storage-manager');
+          
+          // Create the new page in IndexedDB
+          await storageManager.savePage(slug, {
+            title: "Untitled",
+            content: {
+              type: 'doc',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: '' }]
+                }
+              ]
+            },
+            parentSlug: isSubPage ? currentSlug : undefined,
+            isSubPage: isSubPage,
+            hideFromSidebar: false
+          });
+
+        } catch (error) {
+          console.error("Error creating sub page:", error);
+          
+          // Fallback to localStorage
+          const savedPages = localStorage.getItem("novel-pages");
+          const pages = savedPages ? JSON.parse(savedPages) : {};
+          
+          pages[slug] = {
+            title: "Untitled",
+            content: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            parentSlug: isSubPage ? currentSlug : undefined,
+            isSubPage: isSubPage,
+            hideFromSidebar: false
+          };
+          
+          localStorage.setItem("novel-pages", JSON.stringify(pages));
+        }
       };
 
-      localStorage.setItem("novel-pages", JSON.stringify(pages));
-
-      // Debug logging
-      console.log("Created page:", {
-        slug,
-        currentPath,
-        currentSlug,
-        isSubPage,
-        pageData: pages[slug],
+      // Create the page and then navigate
+      createSubPage().then(() => {
+        // Add a small delay to ensure the page reference is properly saved in the editor
+        setTimeout(() => {
+          // Trigger another save to ensure the parent page has the reference
+          const saveEvent = new CustomEvent("forceSave");
+          window.dispatchEvent(saveEvent);
+          
+          // Navigate to the new page after ensuring everything is saved
+          setTimeout(() => {
+            window.location.href = `/page/${slug}?new=true`;
+          }, 500);
+        }, 300);
+      }).catch(error => {
+        console.error("Failed to create sub page:", error);
+        alert("创建子页面失败，请重试");
       });
-
-      // Navigate to the new page with sufficient delay to ensure data is saved
-      // Increased delay to ensure editor content is properly saved
-      setTimeout(() => {
-        window.location.href = `/page/${slug}`;
-      }, 800);
     },
   },
   {

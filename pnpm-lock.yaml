@@ -163,6 +163,9 @@ importers:
       openai:
         specifier: ^4.28.4
         version: 4.104.0(zod@3.25.76)
+      prosemirror-state:
+        specifier: ^1.4.3
+        version: 1.4.3
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -284,6 +287,9 @@ importers:
       katex:
         specifier: ^0.16.20
         version: 0.16.22
+      prosemirror-state:
+        specifier: ^1.4.3
+        version: 1.4.3
       react:
         specifier: '>=18'
         version: 18.2.0

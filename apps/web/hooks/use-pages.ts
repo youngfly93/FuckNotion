@@ -9,7 +9,7 @@ interface UsePages {
   currentPage: Page | null;
   isLoading: boolean;
   error: string | null;
-  savePage: (slug: string, data: { title: string; content: JSONContent; parentSlug?: string; isSubPage?: boolean }) => Promise<void>;
+  savePage: (slug: string, data: { title: string; content: JSONContent; parentSlug?: string; isSubPage?: boolean; hideFromSidebar?: boolean }) => Promise<void>;
   loadPage: (slug: string) => Promise<Page | null>;
   deletePage: (slug: string) => Promise<void>;
   getAllPages: () => Promise<Page[]>;
@@ -70,12 +70,13 @@ export const usePages = (): UsePages => {
 
   // 保存页面
   const savePage = useCallback(async (
-    slug: string, 
-    data: { 
-      title: string; 
-      content: JSONContent; 
-      parentSlug?: string; 
-      isSubPage?: boolean 
+    slug: string,
+    data: {
+      title: string;
+      content: JSONContent;
+      parentSlug?: string;
+      isSubPage?: boolean;
+      hideFromSidebar?: boolean;
     }
   ) => {
     try {

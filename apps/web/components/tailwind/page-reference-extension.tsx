@@ -14,33 +14,41 @@ interface PageReferenceAttributes {
 const PageReferenceComponent = ({ node, updateAttributes }: NodeViewProps) => {
   const { slug, title } = node.attrs as PageReferenceAttributes;
   const [currentTitle, setCurrentTitle] = React.useState(title);
+  const [pageExists, setPageExists] = React.useState(true);
 
-  // Listen for page title updates and deletions from localStorage
+  // Listen for page title updates
   React.useEffect(() => {
-    const checkPageStatus = () => {
-      const savedPages = localStorage.getItem("novel-pages");
-      const pages = savedPages ? JSON.parse(savedPages) : {};
-
-      // Check if the page has been deleted
-      if (!pages[slug]) {
-        // If the page was deleted, mark this reference as invalid
-        setCurrentTitle("[已删除的页面]");
-        updateAttributes({ title: "[已删除的页面]" });
-        return;
-      }
-
-      // Only update existing pages, don't create new ones
-      // Page creation should be handled by the actual page creation logic
-      if (pages[slug] && pages[slug].title !== currentTitle) {
-        setCurrentTitle(pages[slug].title);
-        updateAttributes({ title: pages[slug].title });
+    const checkPageStatus = async () => {
+      try {
+        const { storageManager } = await import('@/lib/db/storage-manager');
+        const page = await storageManager.getPage(slug);
+        
+        if (page && page.title !== currentTitle) {
+          setCurrentTitle(page.title);
+          updateAttributes({ title: page.title });
+        } else if (!page) {
+          // Fallback to localStorage
+          const savedPages = localStorage.getItem("novel-pages");
+          const pages = savedPages ? JSON.parse(savedPages) : {};
+          
+          if (pages[slug]) {
+            setCurrentTitle(pages[slug].title);
+            updateAttributes({ title: pages[slug].title });
+          } else {
+            setPageExists(false);
+            setCurrentTitle("[已删除的页面]");
+            updateAttributes({ title: "[已删除的页面]" });
+          }
+        }
+      } catch (error) {
+        console.error("Error checking page status:", error);
       }
     };
 
     // Check for updates periodically
-    const interval = setInterval(checkPageStatus, 1000);
+    const interval = setInterval(checkPageStatus, 2000);
 
-    // Also check when the page gains focus (user comes back from editing)
+    // Also check when the page gains focus
     const handleFocus = () => checkPageStatus();
     window.addEventListener("focus", handleFocus);
 
@@ -52,29 +60,47 @@ const PageReferenceComponent = ({ node, updateAttributes }: NodeViewProps) => {
 
   const handleClick = () => {
     // Don't allow clicking on deleted pages
-    if (currentTitle === "[已删除的页面]") {
+    if (!pageExists) {
       alert("此页面已被删除");
       return;
     }
-    window.open(`/page/${slug}`, "_blank");
+    // Navigate in the same window instead of opening new tab
+    window.location.href = `/page/${slug}`;
   };
 
-  const handleTitleUpdate = (newTitle: string) => {
+  const handleTitleUpdate = async (newTitle: string) => {
     setCurrentTitle(newTitle);
     updateAttributes({ title: newTitle });
 
-    // Update title in localStorage
-    const savedPages = localStorage.getItem("novel-pages");
-    const pages = savedPages ? JSON.parse(savedPages) : {};
+    try {
+      // Update title in IndexedDB
+      const { storageManager } = await import('@/lib/db/storage-manager');
+      const page = await storageManager.getPage(slug);
+      
+      if (page) {
+        await storageManager.savePage(slug, {
+          title: newTitle,
+          content: page.content,
+          parentSlug: page.parentSlug,
+          isSubPage: page.isSubPage
+        });
+      }
+    } catch (error) {
+      console.error("Error updating title:", error);
+      
+      // Fallback to localStorage
+      const savedPages = localStorage.getItem("novel-pages");
+      const pages = savedPages ? JSON.parse(savedPages) : {};
 
-    if (pages[slug]) {
-      pages[slug].title = newTitle;
-      pages[slug].updatedAt = new Date().toISOString();
-      localStorage.setItem("novel-pages", JSON.stringify(pages));
+      if (pages[slug]) {
+        pages[slug].title = newTitle;
+        pages[slug].updatedAt = new Date().toISOString();
+        localStorage.setItem("novel-pages", JSON.stringify(pages));
+      }
     }
   };
 
-  const isDeleted = currentTitle === "[已删除的页面]";
+  const isDeleted = !pageExists;
 
   return (
     <NodeViewWrapper className="page-reference-wrapper">

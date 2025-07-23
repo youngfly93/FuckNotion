@@ -32,6 +32,7 @@ export class StorageManager {
     content: JSONContent;
     parentSlug?: string;
     isSubPage?: boolean;
+    hideFromSidebar?: boolean;
   }): Promise<number> {
     try {
       // 查找是否已存在
@@ -46,9 +47,11 @@ export class StorageManager {
         htmlContent: generateHTML(data.content),
         parentSlug: data.parentSlug,
         isSubPage: data.isSubPage,
+        hideFromSidebar: data.hideFromSidebar,
         updatedAt: now,
         createdAt: existingPage?.createdAt || now
       };
+      
       
       // 如果有父页面，获取父页面 ID
       if (data.parentSlug) {

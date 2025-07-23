@@ -6,10 +6,11 @@ import Sidebar from "@/components/sidebar";
 import ExportMenu from "@/components/export-menu";
 import { Menu, Settings, Share, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSidebar } from "@/contexts/sidebar-context";
 import { useBackground } from "@/contexts/background-context";
+import { usePages } from "@/hooks/use-pages";
 
 interface PageData {
   title: string;
@@ -18,12 +19,25 @@ interface PageData {
   updatedAt: string;
   parentSlug?: string;
   isSubPage?: boolean;
+  hideFromSidebar?: boolean;
 }
 
 export default function DynamicPageClient() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const slug = params.slug as string;
+  const isCreateNew = searchParams.get('new') === 'true';
+
+  // 使用 IndexedDB 存储
+  const {
+    pages,
+    currentPage,
+    isLoading: pagesLoading,
+    error,
+    savePage,
+    loadPage
+  } = usePages();
 
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,6 +45,7 @@ export default function DynamicPageClient() {
   const [showTitleInput, setShowTitleInput] = useState(false);
   const [isNewPage, setIsNewPage] = useState(false);
   const [parentPage, setParentPage] = useState<PageData | null>(null);
+  const [pageNotFound, setPageNotFound] = useState(false);
   const { isOpen: sidebarOpen, toggle: toggleSidebar } = useSidebar();
   const { backgroundImage } = useBackground();
 
@@ -42,58 +57,289 @@ export default function DynamicPageClient() {
       .join(" ");
   };
 
+  // 使用 ref 来跟踪是否已经初始化，避免重复创建
+  const isInitialized = useRef(false);
+  const lastSlug = useRef(slug);
+
+  // 当 slug 变化时，重置初始化状态
+  if (lastSlug.current !== slug) {
+    isInitialized.current = false;
+    lastSlug.current = slug;
+  }
+
   useEffect(() => {
-    // Load page data from localStorage immediately
-    const savedPages = localStorage.getItem("novel-pages");
-    const pages = savedPages ? JSON.parse(savedPages) : {};
+    // 如果已经初始化，或者正在加载中，则跳过
+    if (isInitialized.current) {
+      return;
+    }
 
-    if (pages[slug]) {
-      // Page exists, load it
-      const currentPageData = pages[slug];
-      setPageData(currentPageData);
-      setTitle(currentPageData.title);
+    const loadPageData = async () => {
+      try {
+        // 标记为已初始化
+        isInitialized.current = true;
 
-      // Load parent page data if this is a sub page
-      if (currentPageData.parentSlug && pages[currentPageData.parentSlug]) {
-        setParentPage(pages[currentPageData.parentSlug]);
+        // 如果是创建新页面 (带有 ?new=true 参数)
+        if (isCreateNew) {
+          // 先尝试加载可能已经存在的页面（例如通过 "/" 斜杠命令提前创建的子页面）。
+          const existing = await loadPage(slug);
+
+          if (existing) {
+            // 页面已存在，直接使用现有数据，避免覆盖 isSubPage / parentSlug 等属性
+            setPageData({
+              title: existing.title,
+              content: existing.content,
+              createdAt: existing.createdAt.toISOString(),
+              updatedAt: existing.updatedAt.toISOString(),
+              parentSlug: existing.parentSlug,
+              isSubPage: existing.isSubPage,
+              hideFromSidebar: existing.hideFromSidebar
+            });
+            setTitle(existing.title);
+
+            // 如果是子页面，则加载父页面信息
+            if (existing.parentSlug) {
+              loadPage(existing.parentSlug).then(parent => {
+                if (parent) {
+                  setParentPage({
+                    title: parent.title,
+                    content: parent.content,
+                    createdAt: parent.createdAt.toISOString(),
+                    updatedAt: parent.updatedAt.toISOString(),
+                    parentSlug: parent.parentSlug,
+                    isSubPage: parent.isSubPage
+                  });
+                }
+              });
+            }
+
+            // 移除 URL 参数
+            router.replace(`/page/${slug}`);
+            return;
+          }
+
+          // 页面不存在，创建一个新的顶级页面
+          setIsLoading(false);
+
+          const newPageData = {
+            title: "Untitled",
+            content: {
+              type: 'doc',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: '' }]
+                }
+              ]
+            }
+          };
+
+          await savePage(slug, {
+            ...newPageData,
+            isSubPage: false,
+            hideFromSidebar: false
+          });
+
+          setPageData({
+            ...newPageData,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
+          setTitle(newPageData.title);
+          setIsNewPage(true);
+
+          // 移除 URL 参数
+          router.replace(`/page/${slug}`);
+          return;
+        }
+
+        setIsLoading(true);
+
+        // 尝试从 IndexedDB 加载页面
+        const page = await loadPage(slug);
+
+        if (page) {
+          // 页面存在，加载数据
+          setPageData({
+            title: page.title,
+            content: page.content,
+            createdAt: page.createdAt.toISOString(),
+            updatedAt: page.updatedAt.toISOString(),
+            parentSlug: page.parentSlug,
+            isSubPage: page.isSubPage
+          });
+          setTitle(page.title);
+
+          // 加载父页面数据
+          if (page.parentSlug) {
+            // 从 IndexedDB 加载父页面
+            loadPage(page.parentSlug).then(parent => {
+              if (parent) {
+                setParentPage({
+                  title: parent.title,
+                  content: parent.content,
+                  createdAt: parent.createdAt.toISOString(),
+                  updatedAt: parent.updatedAt.toISOString(),
+                  parentSlug: parent.parentSlug,
+                  isSubPage: parent.isSubPage
+                });
+              }
+            });
+          }
+        } else {
+          // 检查是否应该创建新页面
+          if (isCreateNew) {
+            // 创建新页面
+            const newPageData = {
+              title: "Untitled",
+              content: {
+                type: 'doc',
+                content: [
+                  {
+                    type: 'paragraph',
+                    content: [{ type: 'text', text: '' }]
+                  }
+                ]
+              }
+            };
+
+            await savePage(slug, {
+              ...newPageData,
+              isSubPage: false,
+              hideFromSidebar: false
+            });
+            setPageData({
+              ...newPageData,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            });
+            setTitle(newPageData.title);
+            setIsNewPage(true);
+
+            // 移除 URL 参数
+            router.replace(`/page/${slug}`);
+          } else {
+            // 页面不存在，显示 404
+            setPageNotFound(true);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading page:', error);
+        // Fallback 到 localStorage
+        const savedPages = localStorage.getItem("novel-pages");
+        const legacyPages = savedPages ? JSON.parse(savedPages) : {};
+
+        if (legacyPages[slug]) {
+          setPageData(legacyPages[slug]);
+          setTitle(legacyPages[slug].title);
+        } else {
+          // 检查是否应该创建新页面
+          if (isCreateNew) {
+            // 创建新页面
+            const newPageData = {
+              title: "Untitled",
+              content: {
+                type: 'doc',
+                content: [
+                  {
+                    type: 'paragraph',
+                    content: [{ type: 'text', text: '' }]
+                  }
+                ]
+              }
+            };
+
+            await savePage(slug, newPageData);
+            setPageData({
+              ...newPageData,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            });
+            setTitle(newPageData.title);
+            setIsNewPage(true);
+
+            // 移除 URL 参数
+            router.replace(`/page/${slug}`);
+          } else {
+            // 页面不存在，显示 404
+            setPageNotFound(true);
+            return;
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } else {
-      // Create new page immediately
-      const newPage: PageData = {
-        title: "Untitled",
-        content: null,
-        createdAt: new Date().toISOString(),
+    };
+
+    loadPageData();
+  }, [slug, loadPage, savePage, isCreateNew, router]); // 移除 pages 依赖以避免循环
+
+  // 清理 timer
+  useEffect(() => {
+    return () => {
+      if (titleDebounceTimer.current) {
+        clearTimeout(titleDebounceTimer.current);
+      }
+    };
+  }, []);
+
+  const savePageData = async (content: any) => {
+    if (!pageData) return;
+
+    try {
+      // 保存到 IndexedDB
+      await savePage(slug, {
+        title: pageData.title,
+        content,
+        parentSlug: pageData.parentSlug,
+        isSubPage: pageData.isSubPage,
+        hideFromSidebar: pageData.hideFromSidebar
+      });
+
+      // 更新本地状态
+      const updatedPageData = {
+        ...pageData,
+        content,
+        updatedAt: new Date().toISOString(),
+      };
+      setPageData(updatedPageData);
+    } catch (error) {
+      console.error('Error saving page to IndexedDB:', error);
+
+      // Fallback 到 localStorage
+      const savedPages = localStorage.getItem("novel-pages");
+      const pages = savedPages ? JSON.parse(savedPages) : {};
+
+      pages[slug] = {
+        ...pageData,
+        content,
         updatedAt: new Date().toISOString(),
       };
 
-      pages[slug] = newPage;
       localStorage.setItem("novel-pages", JSON.stringify(pages));
-      setPageData(newPage);
-      setTitle(newPage.title);
+      setPageData(pages[slug]);
     }
-
-    setIsLoading(false);
-  }, [slug]);
-
-  const savePageData = (content: any) => {
-    if (!pageData) return;
-
-    const savedPages = localStorage.getItem("novel-pages");
-    const pages = savedPages ? JSON.parse(savedPages) : {};
-
-    pages[slug] = {
-      ...pageData,
-      content,
-      updatedAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem("novel-pages", JSON.stringify(pages));
-    setPageData(pages[slug]);
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setTitle(newTitle);
-    if (pageData) {
+  // 使用 useRef 来存储 debounce timer
+  const titleDebounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // 保存标题的函数
+  const saveTitleToDb = useCallback(async (newTitle: string) => {
+    if (!pageData) return;
+    
+    try {
+      // 保存到 IndexedDB
+      await savePage(slug, {
+        title: newTitle,
+        content: pageData.content,
+        parentSlug: pageData.parentSlug,
+        isSubPage: pageData.isSubPage
+      });
+    } catch (error) {
+      console.error('Error saving title to IndexedDB:', error);
+
+      // Fallback 到 localStorage
       const savedPages = localStorage.getItem("novel-pages");
       const pages = savedPages ? JSON.parse(savedPages) : {};
 
@@ -104,14 +350,61 @@ export default function DynamicPageClient() {
       };
 
       localStorage.setItem("novel-pages", JSON.stringify(pages));
-      setPageData(pages[slug]);
     }
-  };
+  }, [pageData, savePage, slug]);
+
+  const handleTitleChange = useCallback((newTitle: string) => {
+    setTitle(newTitle);
+    
+    if (pageData) {
+      // 更新本地状态立即
+      const updatedPageData = {
+        ...pageData,
+        title: newTitle,
+        updatedAt: new Date().toISOString(),
+      };
+      setPageData(updatedPageData);
+
+      // 清除之前的 timer
+      if (titleDebounceTimer.current) {
+        clearTimeout(titleDebounceTimer.current);
+      }
+
+      // 设置新的 timer，延迟保存到数据库
+      titleDebounceTimer.current = setTimeout(() => {
+        saveTitleToDb(newTitle);
+      }, 500); // 500ms 延迟
+    }
+  }, [pageData, saveTitleToDb]);
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // 显示 404 页面
+  if (pageNotFound) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="text-center">
+          <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
+          <p className="text-xl text-gray-600 mb-8">页面不存在</p>
+          <p className="text-gray-500 mb-8">您访问的页面可能已被删除或从未存在。</p>
+          <div className="flex gap-4 justify-center">
+            <Link href="/">
+              <Button>返回首页</Button>
+            </Link>
+            <Button 
+              variant="outline"
+              onClick={() => router.back()}
+            >
+              返回上一页
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -172,17 +465,20 @@ export default function DynamicPageClient() {
               onChange={(e) => handleTitleChange(e.target.value)}
               className="text-3xl font-bold bg-transparent border-none outline-none text-center placeholder-gray-400 max-w-2xl w-full"
               placeholder="Untitled Page"
+              autoFocus={isNewPage}
             />
           </div>
         </div>
 
         {/* Editor */}
-        <TailwindAdvancedEditor
-          initialContent={pageData?.content}
-          onUpdate={savePageData}
-          pageTitle={title}
-          darkMode={false}
-        />
+        {pageData && (
+          <TailwindAdvancedEditor
+            initialContent={pageData.content}
+            onUpdate={savePageData}
+            pageTitle={title}
+            darkMode={false}
+          />
+        )}
       </div>
     </div>
   );

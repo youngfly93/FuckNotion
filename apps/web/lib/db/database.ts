@@ -12,6 +12,7 @@ export interface Page {
   parentId?: number;
   parentSlug?: string;
   isSubPage?: boolean;
+  hideFromSidebar?: boolean; // 是否在侧边栏中隐藏
   tags?: string[];
   createdAt: Date;
   updatedAt: Date;

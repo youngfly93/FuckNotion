@@ -6,7 +6,20 @@
       "Bash(pnpm install:*)",
       "Bash(cmd /c \"pnpm install\")",
       "Bash(powershell:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git config:*)",
+      "Bash(git commit:*)",
+      "Bash(ls:*)",
+      "Bash(git push:*)",
+      "Bash(rustc:*)",
+      "Bash(cargo --version)",
+      "Bash(pnpm --filter novel-next-app build:desktop)",
+      "Bash(pnpm build:desktop:*)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "Bash(BUILD_MODE=desktop npm run build)",
+      "Bash(npx tauri:*)",
+      "Bash(cargo install:*)"
     ],
     "deny": []
   }

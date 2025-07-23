@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuckNotion 侧边栏调试工具</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .debug-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .warning { border-left-color: #ffc107; background: #fff3cd; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        pre {
+            background: #f1f3f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 3px solid #007bff;
+        }
+        .step.success { border-left-color: #28a745; background: #d4edda; }
+        .step.error { border-left-color: #dc3545; background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h1>🐛 FuckNotion 侧边栏调试工具</h1>
+    <p>这个工具会帮你诊断侧边栏添加页面功能的问题。</p>
+
+    <div class="debug-section">
+        <h2>🔧 快速测试</h2>
+        <button onclick="testPageCreation()">🧪 测试页面创建流程</button>
+        <button onclick="testIndexedDB()">💾 测试 IndexedDB 连接</button>
+        <button onclick="testNavigation()">🧭 测试路由导航</button>
+        <button onclick="simulateAddPage()">➕ 模拟添加页面</button>
+        <button onclick="clearResults()">🧹 清空结果</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function addResult(type, title, content) {
+            const div = document.createElement('div');
+            div.className = `debug-section ${type}`;
+            div.innerHTML = `<h3>${title}</h3><div>${content}</div>`;
+            results.appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function addStep(type, content) {
+            const div = document.createElement('div');
+            div.className = `step ${type}`;
+            div.innerHTML = content;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            results.innerHTML = '';
+        }
+
+        // 测试页面创建流程
+        async function testPageCreation() {
+            clearResults();
+            addResult('', '🧪 开始测试页面创建流程', '正在逐步测试页面创建的各个环节...');
+
+            // 步骤 1: 生成 slug
+            addStep('', '📝 步骤 1: 生成页面 slug');
+            const timestamp = Date.now();
+            const slug = `untitled-${timestamp}`;
+            addStep('success', `✅ 生成 slug: ${slug}`);
+
+            // 步骤 2: 测试 IndexedDB 连接
+            addStep('', '💾 步骤 2: 测试 IndexedDB 连接');
+            try {
+                const request = indexedDB.open('FuckNotionDB', 1);
+                
+                request.onsuccess = function(event) {
+                    const db = event.target.result;
+                    addStep('success', `✅ IndexedDB 连接成功 (版本: ${db.version})`);
+                    
+                    // 步骤 3: 测试页面保存
+                    testPageSave(db, slug);
+                };
+                
+                request.onerror = function(e) {
+                    addStep('error', `❌ IndexedDB 连接失败: ${e.target.error}`);
+                };
+            } catch (error) {
+                addStep('error', `❌ IndexedDB 测试异常: ${error.message}`);
+            }
+        }
+
+        // 测试页面保存
+        function testPageSave(db, slug) {
+            addStep('', '💾 步骤 3: 测试页面保存到 IndexedDB');
+            
+            try {
+                const transaction = db.transaction(['pages'], 'readwrite');
+                const store = transaction.objectStore('pages');
+                
+                const pageData = {
+                    slug: slug,
+                    title: 'Untitled',
+                    content: {
+                        type: 'doc',
+                        content: [
+                            {
+                                type: 'paragraph',
+                                content: [{ type: 'text', text: '' }]
+                            }
+                        ]
+                    },
+                    textContent: 'Untitled',
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                };
+                
+                const addRequest = store.add(pageData);
+                
+                addRequest.onsuccess = function() {
+                    addStep('success', '✅ 页面保存成功');
+                    
+                    // 步骤 4: 测试路由导航
+                    testRouteNavigation(slug);
+                };
+                
+                addRequest.onerror = function(e) {
+                    addStep('error', `❌ 页面保存失败: ${e.target.error}`);
+                };
+                
+                transaction.onerror = function(e) {
+                    addStep('error', `❌ 事务失败: ${e.target.error}`);
+                };
+                
+            } catch (error) {
+                addStep('error', `❌ 页面保存异常: ${error.message}`);
+            }
+        }
+
+        // 测试路由导航
+        function testRouteNavigation(slug) {
+            addStep('', '🧭 步骤 4: 测试路由导航');
+            
+            try {
+                const targetUrl = `/page/${slug}?new=true`;
+                addStep('success', `✅ 目标 URL: ${targetUrl}`);
+                
+                // 检查当前是否在正确的域名下
+                if (window.location.hostname === 'localhost' || window.location.hostname.includes('localhost')) {
+                    addStep('success', '✅ 运行环境正常');
+                    
+                    // 提供导航选项
+                    addStep('', `
+                        <div style="margin: 10px 0;">
+                            <button onclick="window.location.href='${targetUrl}'" style="background: #28a745;">
+                                🚀 导航到测试页面
+                            </button>
+                            <button onclick="window.open('${targetUrl}', '_blank')" style="background: #17a2b8;">
+                                🔗 在新标签页打开
+                            </button>
+                        </div>
+                    `);
+                } else {
+                    addStep('warning', '⚠️ 请确保在正确的开发环境中运行此测试');
+                }
+                
+            } catch (error) {
+                addStep('error', `❌ 路由测试异常: ${error.message}`);
+            }
+        }
+
+        // 测试 IndexedDB
+        async function testIndexedDB() {
+            clearResults();
+            addResult('', '💾 IndexedDB 连接测试', '正在测试 IndexedDB 的各项功能...');
+
+            if (!('indexedDB' in window)) {
+                addResult('error', '❌ IndexedDB 不支持', '当前浏览器不支持 IndexedDB');
+                return;
+            }
+
+            try {
+                const request = indexedDB.open('FuckNotionDB', 1);
+                
+                request.onsuccess = function(event) {
+                    const db = event.target.result;
+                    
+                    addResult('success', '✅ IndexedDB 连接成功', `
+                        <ul>
+                            <li>数据库名称: ${db.name}</li>
+                            <li>版本: ${db.version}</li>
+                            <li>对象存储: ${Array.from(db.objectStoreNames).join(', ')}</li>
+                        </ul>
+                    `);
+
+                    // 测试读写权限
+                    testReadWritePermissions(db);
+                };
+                
+                request.onerror = function(e) {
+                    addResult('error', '❌ IndexedDB 连接失败', `错误: ${e.target.error}`);
+                };
+
+                request.onupgradeneeded = function(event) {
+                    addResult('warning', '⚠️ 数据库需要升级', '正在创建或升级数据库结构...');
+                };
+
+            } catch (error) {
+                addResult('error', '❌ IndexedDB 测试失败', `错误: ${error.message}`);
+            }
+        }
+
+        // 测试读写权限
+        function testReadWritePermissions(db) {
+            try {
+                const transaction = db.transaction(['pages'], 'readwrite');
+                const store = transaction.objectStore('pages');
+                
+                // 测试写入
+                const testData = {
+                    slug: 'test-permissions-' + Date.now(),
+                    title: 'Permission Test',
+                    content: { type: 'doc', content: [] },
+                    textContent: 'Permission Test',
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                };
+                
+                const addRequest = store.add(testData);
+                
+                addRequest.onsuccess = function() {
+                    addResult('success', '✅ 读写权限正常', '可以正常写入和读取数据');
+                    
+                    // 清理测试数据
+                    const deleteRequest = store.delete(testData.slug);
+                    deleteRequest.onsuccess = function() {
+                        console.log('Test data cleaned up');
+                    };
+                };
+                
+                addRequest.onerror = function(e) {
+                    addResult('error', '❌ 写入权限异常', `无法写入数据: ${e.target.error}`);
+                };
+                
+            } catch (error) {
+                addResult('error', '❌ 权限测试失败', `错误: ${error.message}`);
+            }
+        }
+
+        // 测试导航功能
+        function testNavigation() {
+            clearResults();
+            addResult('', '🧭 导航功能测试', '正在测试路由和导航功能...');
+
+            // 检查当前 URL
+            addResult('', '📍 当前位置信息', `
+                <ul>
+                    <li>URL: ${window.location.href}</li>
+                    <li>协议: ${window.location.protocol}</li>
+                    <li>主机: ${window.location.host}</li>
+                    <li>路径: ${window.location.pathname}</li>
+                    <li>查询参数: ${window.location.search}</li>
+                </ul>
+            `);
+
+            // 测试 History API
+            if ('pushState' in window.history) {
+                addResult('success', '✅ History API 支持', 'pushState 和 replaceState 可用');
+            } else {
+                addResult('error', '❌ History API 不支持', '无法使用现代路由功能');
+            }
+
+            // 测试导航到主页
+            addResult('', '🏠 导航测试', `
+                <div style="margin: 10px 0;">
+                    <button onclick="window.location.href='/'" style="background: #28a745;">
+                        🏠 导航到主页
+                    </button>
+                    <button onclick="window.location.href='/settings'" style="background: #6c757d;">
+                        ⚙️ 导航到设置
+                    </button>
+                    <button onclick="testCreatePageNavigation()" style="background: #007bff;">
+                        ➕ 测试创建页面导航
+                    </button>
+                </div>
+            `);
+        }
+
+        // 测试创建页面导航
+        function testCreatePageNavigation() {
+            const timestamp = Date.now();
+            const slug = `test-nav-${timestamp}`;
+            const url = `/page/${slug}?new=true`;
+            
+            addResult('', '🧪 创建页面导航测试', `
+                <p>准备导航到: <code>${url}</code></p>
+                <div style="margin: 10px 0;">
+                    <button onclick="window.location.href='${url}'" style="background: #28a745;">
+                        🚀 立即导航
+                    </button>
+                    <button onclick="window.open('${url}', '_blank')" style="background: #17a2b8;">
+                        🔗 新标签页打开
+                    </button>
+                </div>
+            `);
+        }
+
+        // 模拟添加页面
+        async function simulateAddPage() {
+            clearResults();
+            addResult('', '➕ 模拟侧边栏添加页面', '正在模拟完整的添加页面流程...');
+
+            try {
+                // 步骤 1: 生成唯一 slug
+                const timestamp = Date.now();
+                const slug = `untitled-${timestamp}`;
+                addStep('success', `📝 生成 slug: ${slug}`);
+
+                // 步骤 2: 准备页面数据
+                const pageData = {
+                    slug: slug,
+                    title: 'Untitled',
+                    content: {
+                        type: 'doc',
+                        content: [
+                            {
+                                type: 'paragraph',
+                                content: [{ type: 'text', text: '' }]
+                            }
+                        ]
+                    },
+                    textContent: 'Untitled',
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                };
+                addStep('success', '📋 页面数据准备完成');
+
+                // 步骤 3: 保存到 IndexedDB
+                const request = indexedDB.open('FuckNotionDB', 1);
+                
+                request.onsuccess = function(event) {
+                    const db = event.target.result;
+                    const transaction = db.transaction(['pages'], 'readwrite');
+                    const store = transaction.objectStore('pages');
+                    
+                    const addRequest = store.add(pageData);
+                    
+                    addRequest.onsuccess = function() {
+                        addStep('success', '💾 页面保存到 IndexedDB 成功');
+                        
+                        // 步骤 4: 导航到新页面
+                        const targetUrl = `/page/${slug}?new=true`;
+                        addStep('success', `🧭 准备导航到: ${targetUrl}`);
+                        
+                        addResult('success', '🎉 模拟添加页面成功！', `
+                            <p>页面创建流程完成，现在可以导航到新页面：</p>
+                            <div style="margin: 10px 0;">
+                                <button onclick="window.location.href='${targetUrl}'" style="background: #28a745;">
+                                    🚀 打开新页面
+                                </button>
+                                <button onclick="window.open('${targetUrl}', '_blank')" style="background: #17a2b8;">
+                                    🔗 新标签页打开
+                                </button>
+                            </div>
+                            <pre>${JSON.stringify(pageData, null, 2)}</pre>
+                        `);
+                    };
+                    
+                    addRequest.onerror = function(e) {
+                        addStep('error', `❌ 保存失败: ${e.target.error}`);
+                        
+                        // 尝试 localStorage 备用方案
+                        addStep('', '🔄 尝试 localStorage 备用方案...');
+                        try {
+                            const pages = JSON.parse(localStorage.getItem('novel-pages') || '{}');
+                            pages[slug] = {
+                                title: pageData.title,
+                                content: pageData.content,
+                                createdAt: pageData.createdAt.toISOString(),
+                                updatedAt: pageData.updatedAt.toISOString()
+                            };
+                            localStorage.setItem('novel-pages', JSON.stringify(pages));
+                            addStep('success', '✅ localStorage 备用保存成功');
+                        } catch (localError) {
+                            addStep('error', `❌ localStorage 备用方案也失败: ${localError.message}`);
+                        }
+                    };
+                };
+                
+                request.onerror = function(e) {
+                    addStep('error', `❌ IndexedDB 连接失败: ${e.target.error}`);
+                };
+
+            } catch (error) {
+                addStep('error', `❌ 模拟过程异常: ${error.message}`);
+            }
+        }
+
+        // 页面加载时的初始检查
+        window.addEventListener('load', function() {
+            addResult('', '🚀 调试工具已加载', `
+                <p>当前时间: ${new Date().toLocaleString()}</p>
+                <p>用户代理: ${navigator.userAgent}</p>
+                <p>IndexedDB 支持: ${'indexedDB' in window ? '✅ 是' : '❌ 否'}</p>
+                <p>点击上方按钮开始调试侧边栏添加页面功能。</p>
+            `);
+        });
+    </script>
+</body>
+</html>
