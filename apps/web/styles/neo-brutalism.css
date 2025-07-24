@@ -337,6 +337,70 @@
   letter-spacing: 0.5px;
 }
 
+/* Sidebar specific enhancements */
+.neo-sidebar {
+  background: var(--neo-white);
+  border-right: 6px solid var(--neo-black);
+  box-shadow: 6px 0 0px var(--neo-black);
+}
+
+.neo-logo-container {
+  transition: transform 0.2s ease;
+}
+
+.neo-logo-container:hover {
+  transform: scale(1.1) rotate(-2deg);
+}
+
+/* Decorative geometric shapes */
+.neo-geometric-accent {
+  position: absolute;
+  background: var(--neo-yellow);
+  border: 2px solid var(--neo-black);
+  transform: rotate(45deg);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.neo-geometric-accent:hover {
+  transform: rotate(45deg) scale(1.2);
+  opacity: 1;
+}
+
+/* Enhanced button effects */
+.neo-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px var(--neo-black);
+}
+
+.neo-button:active {
+  transform: translate(0px, 0px);
+  box-shadow: 2px 2px 0px var(--neo-black);
+}
+
+/* Pulse animation for decorative elements */
+@keyframes neo-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.neo-pulse {
+  animation: neo-pulse 2s infinite;
+}
+
+/* Glitch effect for special elements */
+@keyframes neo-glitch {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+}
+
+.neo-glitch:hover {
+  animation: neo-glitch 0.3s ease-in-out;
+}
+
 /* Animations */
 @keyframes neo-bounce {
   0%, 20%, 50%, 80%, 100% {
