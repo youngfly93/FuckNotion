@@ -112,15 +112,6 @@ export default function PagesListPage() {
               <Menu className="h-6 w-6 font-bold text-black" />
             </Button>
 
-            <div className="flex items-center gap-2">
-              <img
-                src="/logo-Photoroom.png"
-                alt="FuckNotion Logo"
-                className="h-6 w-6 rounded-md object-cover"
-              />
-              <span className="font-semibold text-gray-900">FuckNotion</span>
-            </div>
-
             <h1 className="text-2xl font-semibold flex-1">All Pages</h1>
 
             <Button onClick={createNewPage} className="gap-2">

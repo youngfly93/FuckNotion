@@ -85,15 +85,6 @@ export default function HomePage() {
             <Menu className="h-6 w-6 font-bold text-black" />
           </Button>
 
-          <div className="flex items-center gap-2">
-            <img
-              src="/logo-Photoroom.png"
-              alt="FuckNotion Logo"
-              className="h-6 w-6 rounded-md object-cover"
-            />
-            <span className="neo-heading neo-heading-white">FUCKNOTION</span>
-          </div>
-
           <Button size="icon" variant="outline" className="neo-button ml-auto text-white border-white hover:bg-white hover:text-black">
             <a href="https://github.com/youngfly93/FuckNotion" target="_blank" rel="noreferrer">
               <GithubIcon />
