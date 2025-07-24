@@ -69,7 +69,11 @@ export const EditorCommand = forwardRef<HTMLDivElement, ComponentPropsWithoutRef
             <Command
               ref={ref}
               onKeyDown={(e) => {
-                e.stopPropagation();
+                // Only stop propagation for non-navigation keys
+                // Allow ArrowUp, ArrowDown, and Enter to be handled by the Command component
+                if (!["ArrowUp", "ArrowDown", "Enter"].includes(e.key)) {
+                  e.stopPropagation();
+                }
               }}
               id="slash-command"
               className={className}
