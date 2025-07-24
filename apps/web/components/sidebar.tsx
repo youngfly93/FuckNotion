@@ -294,7 +294,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
               return (
                 <div key={slug} className="space-y-1">
                   {/* Parent Page */}
-                  <div className="neo-page-item group flex items-center justify-between px-2 py-2"
+                  <div className="neo-page-item neo-parent-page group flex items-center justify-between px-2 py-2"
                   >
                     <div className="flex items-center flex-1">
                       {/* Collapse/Expand Button */}
@@ -316,7 +316,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                       <Link href={`/page/${slug}`} className="flex-1">
                         <Button
                           variant="ghost"
-                          className={`neo-button w-full justify-start gap-3 ${hasSubPages ? "ml-0" : "ml-6"} ${
+                          className={`neo-button w-full justify-start gap-3 ${
                             isCurrentPage(`/page/${slug}`) ? "neo-button-primary" : ""
                           } ${selectedPageSlug === slug ? "ring-4 ring-yellow-400" : ""} bg-transparent border-0`}
                           onClick={(e) => {
@@ -356,7 +356,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
                   {/* Sub Pages */}
                   {hasSubPages && !isCollapsed && (
-                    <div className="ml-8 space-y-2">
+                    <div className="ml-12 space-y-2">
                       {subPagesByParent[slug].map(([subSlug, subPage]) => (
                         <div
                           key={subSlug}

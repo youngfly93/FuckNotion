@@ -143,25 +143,7 @@
   box-shadow: var(--neo-shadow-md);
 }
 
-.neo-subpage-item {
-  background: var(--neo-gray-100);
-  border: 2px solid var(--neo-black);
-  box-shadow: 2px 2px 0px var(--neo-black);
-  margin: 4px 0;
-  margin-left: 20px;
-  position: relative;
-}
-
-.neo-subpage-item::before {
-  content: '';
-  position: absolute;
-  left: -15px;
-  top: 50%;
-  width: 10px;
-  height: 2px;
-  background: var(--neo-black);
-  transform: translateY(-50%);
-}
+/* Subpage item styles are defined later in the file */
 
 /* Typography */
 .neo-heading {
@@ -253,14 +235,36 @@
   transform: translate(-2px, -2px);
 }
 
+/* Parent page styles */
+.neo-parent-page {
+  position: relative;
+  margin-left: 0 !important;
+  padding-left: 8px;
+}
+
+.neo-parent-page::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--neo-blue);
+  border-radius: 0;
+}
+
 /* Subpage connector line */
+.neo-subpage-item {
+  position: relative;
+}
+
 .neo-subpage-item::before {
   content: '';
   position: absolute;
-  left: -12px;
+  left: -16px;
   top: 50%;
-  width: 8px;
-  height: 2px;
+  width: 12px;
+  height: 3px;
   background: var(--neo-black);
   transform: translateY(-50%);
 }
