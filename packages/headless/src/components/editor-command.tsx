@@ -68,6 +68,7 @@ export const EditorCommand = forwardRef<HTMLDivElement, ComponentPropsWithoutRef
           <tunnelInstance.In>
             <Command
               ref={ref}
+              loop
               onKeyDown={(e) => {
                 // Only stop propagation for non-navigation keys
                 // Allow ArrowUp, ArrowDown, and Enter to be handled by the Command component

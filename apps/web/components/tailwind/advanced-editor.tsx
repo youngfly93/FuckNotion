@@ -158,7 +158,10 @@ const TailwindAdvancedEditor = ({
             </>
           }
         >
-          <EditorCommand className="neo-slash-command-menu z-50 h-auto max-h-[330px] overflow-y-auto px-4 py-4 transition-all bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+          <EditorCommand
+            className="neo-slash-command-menu z-50 h-auto max-h-[330px] overflow-y-auto px-4 py-4 transition-all bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+            defaultValue={suggestionItems[0]?.title}
+          >
             <EditorCommandEmpty className="px-2 text-gray-600 font-bold">No results</EditorCommandEmpty>
             <EditorCommandList>
               {suggestionItems.map((item) => (
