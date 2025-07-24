@@ -1,4 +1,10 @@
 /* Neo-Brutalism Design System for FuckNotion */
+/* Inspired by Figma's bold, geometric design language */
+
+/* Import Neo-Brutalism fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap');
 
 :root {
   /* Neo-Brutalism Colors */
@@ -30,8 +36,21 @@
   --neo-border: 3px solid var(--neo-black);
   --neo-border-thick: 4px solid var(--neo-black);
   
-  /* Typography */
-  --neo-font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Typography - Neo-Brutalism Font Stack */
+  /* Primary: 正文和界面文字 */
+  --neo-font-family-primary: 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'Source Han Sans SC', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif;
+
+  /* Display: 标题和强调文字 */
+  --neo-font-family-display: 'Montserrat', 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'Source Han Sans SC', sans-serif;
+
+  /* Condensed: 压缩字体，用于特殊标题 */
+  --neo-font-family-condensed: 'Oswald', 'Inter', 'PingFang SC', 'Microsoft YaHei', '微软雅黑', sans-serif;
+
+  /* Font Weights */
+  --neo-font-weight-normal: 600;
+  --neo-font-weight-bold: 700;
+  --neo-font-weight-extra-bold: 800;
+  --neo-font-weight-black: 900;
 }
 
 /* Base Neo-Brutalism Classes */
@@ -146,17 +165,55 @@
 
 /* Typography */
 .neo-heading {
-  font-family: var(--neo-font-family);
-  font-weight: 900;
+  font-family: var(--neo-font-family-display);
+  font-weight: var(--neo-font-weight-black);
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--neo-black);
+  /* Color should be set by parent context */
+}
+
+.neo-heading-condensed {
+  font-family: var(--neo-font-family-condensed);
+  font-weight: var(--neo-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.0;
+  /* Color should be set by parent context */
 }
 
 .neo-text {
-  font-family: var(--neo-font-family);
-  font-weight: 600;
+  font-family: var(--neo-font-family-primary);
+  font-weight: var(--neo-font-weight-normal);
+  /* Color should be set by parent context */
+}
+
+.neo-text-bold {
+  font-family: var(--neo-font-family-primary);
+  font-weight: var(--neo-font-weight-bold);
+  /* Color should be set by parent context */
+}
+
+.neo-text-black {
+  font-family: var(--neo-font-family-primary);
+  font-weight: var(--neo-font-weight-black);
   color: var(--neo-black);
+}
+
+/* Color variants for different backgrounds */
+.neo-heading-white {
+  color: var(--neo-white) !important;
+}
+
+.neo-heading-black {
+  color: var(--neo-black) !important;
+}
+
+.neo-text-white {
+  color: var(--neo-white) !important;
+}
+
+.neo-text-black-color {
+  color: var(--neo-black) !important;
 }
 
 /* Layout */

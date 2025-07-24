@@ -86,7 +86,7 @@ export default function HomePage() {
               alt="FuckNotion Logo"
               className="h-6 w-6 rounded-md object-cover"
             />
-            <span className="neo-heading text-white">FUCKNOTION</span>
+            <span className="neo-heading neo-heading-white">FUCKNOTION</span>
           </div>
 
           <Button size="icon" variant="outline" className="neo-button ml-auto text-white border-white hover:bg-white hover:text-black">

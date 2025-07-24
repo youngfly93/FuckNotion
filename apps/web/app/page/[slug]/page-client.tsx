@@ -453,7 +453,7 @@ export default function DynamicPageClient() {
             <div className="flex items-center gap-2 text-sm text-white mb-2">
               <Link
                 href={pageData.parentSlug ? `/page/${pageData.parentSlug}` : "/"}
-                className="neo-text hover:text-yellow-400 transition-colors font-bold"
+                className="neo-text neo-text-white hover:text-yellow-400 transition-colors font-bold"
               >
                 {parentPage.title || "Untitled"}
               </Link>
@@ -468,9 +468,10 @@ export default function DynamicPageClient() {
               type="text"
               value={title}
               onChange={(e) => handleTitleChange(e.target.value)}
-              className="neo-heading text-3xl bg-transparent border-none outline-none text-center placeholder-gray-400 max-w-2xl w-full text-white"
+              className="neo-heading neo-heading-white text-3xl bg-transparent border-none outline-none text-center placeholder-gray-300 max-w-2xl w-full font-black"
               placeholder="UNTITLED PAGE"
               autoFocus={isNewPage}
+              style={{ color: 'white !important' }}
             />
           </div>
         </div>
