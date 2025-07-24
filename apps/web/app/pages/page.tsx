@@ -103,8 +103,13 @@ export default function PagesListPage() {
         {/* Header */}
         <div className="border-b bg-white/50 backdrop-blur-sm sticky top-0 z-10">
           <div className={`flex items-center gap-4 ${sidebarOpen ? "px-4 py-4 max-w-none" : "p-4 max-w-4xl mx-auto"}`}>
-            <Button variant="ghost" size="sm" onClick={toggleSidebar} className="gap-2">
-              <Menu className="h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="lg"
+              onClick={toggleSidebar}
+              className="neo-button-primary h-12 w-12 p-0 bg-yellow-400 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-red-500 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-150"
+            >
+              <Menu className="h-6 w-6 font-bold text-black" />
             </Button>
 
             <div className="flex items-center gap-2">
