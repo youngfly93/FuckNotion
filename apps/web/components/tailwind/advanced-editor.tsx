@@ -158,22 +158,22 @@ const TailwindAdvancedEditor = ({
             </>
           }
         >
-          <EditorCommand className="neo-card z-50 h-auto max-h-[330px] overflow-y-auto px-3 py-3 transition-all">
-            <EditorCommandEmpty className="px-2 text-muted-foreground">No results</EditorCommandEmpty>
+          <EditorCommand className="neo-slash-command-menu z-50 h-auto max-h-[330px] overflow-y-auto px-4 py-4 transition-all bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <EditorCommandEmpty className="px-2 text-gray-600 font-bold">No results</EditorCommandEmpty>
             <EditorCommandList>
               {suggestionItems.map((item) => (
                 <EditorCommandItem
                   value={item.title}
                   onCommand={(val) => item.command(val)}
-                  className="neo-button flex w-full items-center space-x-2 px-3 py-2 text-left text-sm mb-1 last:mb-0"
+                  className="neo-slash-command-item flex w-full items-center space-x-3 px-3 py-3 text-left text-sm mb-2 last:mb-0 bg-gray-50 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-yellow-400 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all duration-150 cursor-pointer"
                   key={item.title}
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-md border border-muted bg-background">
+                  <div className="flex h-10 w-10 items-center justify-center border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                     {item.icon}
                   </div>
                   <div>
-                    <p className="font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                    <p className="font-bold text-black">{item.title}</p>
+                    <p className="text-xs text-gray-700 font-medium">{item.description}</p>
                   </div>
                 </EditorCommandItem>
               ))}

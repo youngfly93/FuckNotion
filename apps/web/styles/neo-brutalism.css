@@ -289,6 +289,35 @@
   transform: translate(-1px, -1px);
 }
 
+/* Slash command menu styles */
+.neo-slash-command-menu {
+  background: var(--neo-white);
+  border: 4px solid var(--neo-black);
+  box-shadow: 8px 8px 0px var(--neo-black);
+  border-radius: 0;
+  padding: 16px;
+  z-index: 50;
+  max-height: 330px;
+  overflow-y: auto;
+}
+
+.neo-slash-command-item {
+  background: #f9f9f9;
+  border: 2px solid var(--neo-black);
+  box-shadow: 3px 3px 0px var(--neo-black);
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.neo-slash-command-item:hover,
+.neo-slash-command-item[aria-selected="true"] {
+  background: var(--neo-yellow);
+  box-shadow: 4px 4px 0px var(--neo-black);
+  transform: translate(-1px, -1px);
+}
+
 .neo-command-item[aria-selected="true"] {
   background: var(--neo-blue);
   color: var(--neo-white);
