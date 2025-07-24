@@ -255,62 +255,45 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       `}
       >
         {/* Header */}
-        <div className="neo-header flex items-center justify-between p-4 relative overflow-hidden"
+        <div className="neo-header flex items-center justify-between p-4"
         >
-          {/* Decorative geometric shapes */}
-          <div className="absolute top-0 right-0 w-16 h-16 bg-yellow-400 transform rotate-45 translate-x-8 -translate-y-8 opacity-80"></div>
-          <div className="absolute bottom-0 left-0 w-12 h-12 bg-red-500 transform -rotate-12 -translate-x-4 translate-y-4 opacity-60"></div>
-
-          <div className="flex items-center gap-3 relative z-10">
-            <div className="neo-logo-container relative">
+          <div className="flex items-center gap-3">
+            <div className="neo-logo-container">
               <img
                 src="/logo.png"
                 alt="FuckNotion Logo"
                 className="h-10 w-10 object-cover border-3 border-white shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
               />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 border-2 border-black"></div>
             </div>
             <div className="flex flex-col">
               <span className="neo-heading text-white text-lg leading-none">FUCK</span>
               <span className="neo-heading text-yellow-400 text-lg leading-none">NOTION</span>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={onToggle} className="neo-button lg:hidden text-white border-white hover:bg-white hover:text-black relative z-10">
+          <Button variant="ghost" size="sm" onClick={onToggle} className="neo-button lg:hidden text-white border-white hover:bg-white hover:text-black">
             <X className="h-4 w-4" />
           </Button>
         </div>
 
         {/* Navigation */}
-        <div id="sidebar-content" className="flex-1 overflow-y-auto p-4 space-y-3 bg-white relative" tabIndex={-1}>
-          {/* Decorative elements */}
-          <div className="absolute top-4 right-4 w-8 h-8 bg-blue-500 transform rotate-45 opacity-20"></div>
-          <div className="absolute bottom-20 left-2 w-6 h-6 bg-green-500 transform -rotate-12 opacity-30"></div>
+        <div id="sidebar-content" className="flex-1 overflow-y-auto p-4 space-y-3 bg-white" tabIndex={-1}>
           {/* Home */}
-          <div className="relative">
-            <div className="absolute -top-1 -left-1 w-full h-full bg-yellow-400 border-3 border-black opacity-20"></div>
-            <Link href="/">
-              <Button
-                variant="ghost"
-                className={`neo-button w-full justify-start gap-3 relative z-10 ${
-                  isCurrentPage("/") ? "neo-button-primary" : ""
-                }`}
-              >
-                <div className="relative">
-                  <Home className="h-4 w-4" />
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-                </div>
-                <span className="neo-text font-black">主页</span>
-              </Button>
-            </Link>
-          </div>
+          <Link href="/">
+            <Button
+              variant="ghost"
+              className={`neo-button w-full justify-start gap-3 ${
+                isCurrentPage("/") ? "neo-button-primary" : ""
+              }`}
+            >
+              <Home className="h-4 w-4" />
+              <span className="neo-text font-bold">主页</span>
+            </Button>
+          </Link>
 
           {/* Section Divider */}
-          <div className="relative my-6">
+          <div className="my-6">
             <div className="h-1 bg-black"></div>
-            <div className="absolute top-0 left-0 w-16 h-1 bg-yellow-400"></div>
-            <div className="absolute top-0 right-0 w-8 h-1 bg-red-500"></div>
             <div className="mt-2 flex items-center gap-2">
-              <div className="w-3 h-3 bg-black transform rotate-45"></div>
               <span className="neo-text font-black text-xs uppercase tracking-wider">PAGES</span>
               <div className="flex-1 h-0.5 bg-gray-300"></div>
             </div>
@@ -325,10 +308,8 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
               return (
                 <div key={slug} className="space-y-1">
                   {/* Parent Page */}
-                  <div className="neo-page-item neo-parent-page group flex items-center justify-between px-2 py-2 relative"
+                  <div className="neo-page-item neo-parent-page group flex items-center justify-between px-2 py-2"
                   >
-                    {/* Decorative corner accent */}
-                    <div className="absolute top-0 right-0 w-3 h-3 bg-yellow-400 transform rotate-45 translate-x-1 -translate-y-1 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div className="flex items-center flex-1">
                       {/* Collapse/Expand Button */}
                       {hasSubPages && (
@@ -368,18 +349,8 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                             }
                           }}
                         >
-                          <div className="relative">
-                            <FileText className="h-4 w-4" />
-                            <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                          </div>
+                          <FileText className="h-4 w-4" />
                           <span className="truncate font-semibold">{page.title || "无标题"}</span>
-                          {hasSubPages && (
-                            <div className="ml-auto flex items-center gap-1">
-                              <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-                              <div className="w-1 h-1 bg-yellow-400 rounded-full"></div>
-                              <div className="w-1 h-1 bg-red-500 rounded-full"></div>
-                            </div>
-                          )}
                         </Button>
                       </Link>
                     </div>
@@ -454,43 +425,23 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
               );
             })}
 
-            <div className="relative mt-6">
-              {/* Decorative background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 transform rotate-1 opacity-20"></div>
-              <Button
-                variant="ghost"
-                className="neo-button neo-button-success w-full justify-start gap-3 relative z-10 border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                onClick={createNewPage}
-              >
-                <div className="relative">
-                  <Plus className="h-5 w-5 font-bold" />
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 transform rotate-45"></div>
-                </div>
-                <span className="neo-text font-black">添加页面</span>
-                <div className="ml-auto w-3 h-3 bg-red-500 transform rotate-45"></div>
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              className="neo-button neo-button-success w-full justify-start gap-3 mt-6"
+              onClick={createNewPage}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="neo-text font-bold">添加页面</span>
+            </Button>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-4 space-y-2 bg-gray-100 border-t-4 border-black relative overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-yellow-400 to-blue-500"></div>
-          <div className="absolute bottom-2 right-2 w-4 h-4 bg-purple-500 transform rotate-45 opacity-60"></div>
-
+        <div className="p-4 space-y-2 bg-gray-100 border-t-4 border-black">
           <Link href="/settings">
-            <Button variant="ghost" className="neo-button w-full justify-start gap-3 relative z-10 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-              <div className="relative">
-                <Settings className="h-4 w-4" />
-                <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
-              </div>
+            <Button variant="ghost" className="neo-button w-full justify-start gap-3">
+              <Settings className="h-4 w-4" />
               <span className="neo-text font-bold">设置</span>
-              <div className="ml-auto flex gap-1">
-                <div className="w-1 h-1 bg-red-500"></div>
-                <div className="w-1 h-1 bg-yellow-400"></div>
-                <div className="w-1 h-1 bg-blue-500"></div>
-              </div>
             </Button>
           </Link>
         </div>
