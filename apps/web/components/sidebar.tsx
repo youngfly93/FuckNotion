@@ -260,7 +260,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
           <div className="flex items-center gap-3">
             <div className="neo-logo-container">
               <img
-                src="/logo.png"
+                src="/logo-Photoroom.png"
                 alt="FuckNotion Logo"
                 className="h-10 w-10 object-cover border-3 border-white shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]"
               />

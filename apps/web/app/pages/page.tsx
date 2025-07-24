@@ -109,7 +109,7 @@ export default function PagesListPage() {
 
             <div className="flex items-center gap-2">
               <img
-                src="/logo.png"
+                src="/logo-Photoroom.png"
                 alt="FuckNotion Logo"
                 className="h-6 w-6 rounded-md object-cover"
               />
