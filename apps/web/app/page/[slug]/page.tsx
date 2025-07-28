@@ -6,6 +6,10 @@ export async function generateStaticParams() {
   return [];
 }
 
+// Force static generation for desktop builds
+export const dynamic = 'force-static';
+export const dynamicParams = true;
+
 export default function DynamicPage() {
   return <DynamicPageClient />;
 }

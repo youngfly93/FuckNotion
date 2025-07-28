@@ -64,7 +64,17 @@ export class StorageManager {
       let pageId: number;
       if (existingPage) {
         // 更新现有页面
-        await db.pages.update(existingPage.id!, pageData);
+        await db.pages.update(existingPage.id!, {
+          title: pageData.title,
+          content: pageData.content,
+          textContent: pageData.textContent,
+          htmlContent: pageData.htmlContent,
+          parentSlug: pageData.parentSlug,
+          parentId: pageData.parentId,
+          isSubPage: pageData.isSubPage,
+          hideFromSidebar: pageData.hideFromSidebar,
+          updatedAt: pageData.updatedAt
+        });
         pageId = existingPage.id!;
       } else {
         // 创建新页面

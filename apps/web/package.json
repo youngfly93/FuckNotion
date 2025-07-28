@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
     "build": "next build",
-    "build:desktop": "BUILD_MODE=desktop next build",
-    "export": "BUILD_MODE=desktop next export -o out",
+    "build:desktop": "cross-env BUILD_MODE=desktop NODE_ENV=production next build",
+    "export": "cross-env BUILD_MODE=desktop NODE_ENV=production next export -o out",
     "start": "next start",
     "lint": "biome lint .",
     "format": "biome format . ",
@@ -62,6 +62,7 @@
     "@types/node": "20.11.24",
     "@types/react": "^18.2.61",
     "@types/react-dom": "18.2.19",
+    "cross-env": "^7.0.3",
     "tailwindcss": "^3.4.1",
     "tsconfig": "workspace:*"
   }

@@ -6,7 +6,7 @@
   "build": {
     "frontendDist": "../web/out",
     "beforeDevCommand": "pnpm --filter novel-next-app dev",
-    "beforeBuildCommand": "pnpm --filter novel-next-app build:desktop && pnpm --filter novel-next-app export",
+    "beforeBuildCommand": "cd ../web && pnpm cross-env BUILD_MODE=desktop NODE_ENV=production next build && pnpm cross-env BUILD_MODE=desktop NODE_ENV=production next export -o out",
     "devUrl": "http://localhost:3001"
   },
   "app": {
