@@ -54,8 +54,8 @@ const loadAutoCompleteSettings = () => {
       const config = JSON.parse(saved);
       return {
         delay: config.delay || 10,
-        minLength: config.minLength || 3,
-        maxTokens: config.maxTokens || 150,
+        minLength: config.minLength || 2,
+        maxTokens: config.maxTokens || 50,
       };
     }
   } catch (error) {
@@ -64,8 +64,8 @@ const loadAutoCompleteSettings = () => {
   // Return defaults if loading fails
   return {
     delay: 10,
-    minLength: 3,
-    maxTokens: 150,
+    minLength: 2,
+    maxTokens: 50,
   };
 };
 
@@ -118,7 +118,7 @@ export const AutoComplete = Extension.create<AutoCompleteOptions>({
               tr.setMeta(AUTOCOMPLETE_PLUGIN_KEY, {
                 ghostText: "",
                 isLoading: false,
-                requestId: "accepted", // Special ID to prevent immediate trigger
+                requestId: "accepted-" + Date.now(), // Add timestamp to track when it was accepted
               });
             }
           }
@@ -242,7 +242,7 @@ export const AutoComplete = Extension.create<AutoCompleteOptions>({
 
     const triggerCompletion = (view: EditorView) => {
       const { from } = view.state.selection;
-      const textBefore = view.state.doc.textBetween(Math.max(0, from - 100), from);
+      const textBefore = view.state.doc.textBetween(Math.max(0, from - 500), from);
 
       debug("🔍 triggerCompletion called:", {
         textBefore: textBefore.trim(),
@@ -400,8 +400,9 @@ export const AutoComplete = Extension.create<AutoCompleteOptions>({
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-        const data = await response.json();
-        return data.text || "";
+        // For non-streaming autocomplete, response is plain text
+        const text = await response.text();
+        return text || "";
       } catch (_error) {
         return "";
       }
@@ -579,41 +580,21 @@ export const AutoComplete = Extension.create<AutoCompleteOptions>({
           }
         } else if (response) {
           // Non-streaming response (for autocomplete)
-          // Read the response text from the existing response
-          const responseText = await response.text();
-
-          // Parse the response format (should be "0:"content"\n" format)
-          const lines = responseText.split("\n").filter((line: string) => line.trim());
-          for (const line of lines) {
-            if (line.startsWith('0:"') && line.endsWith('"')) {
-              // Extract content between 0:" and "
-              accumulatedText = line
-                .slice(3, -1)
-                .replace(/\\"/g, '"')
-                .replace(/\\n/g, "\n")
-                .replace(/\\r/g, "\r")
-                .replace(/\\t/g, "\t")
-                .replace(/\\\\/g, "\\");
-              break;
-            }
-          }
+          // Read the plain text response
+          accumulatedText = await response.text();
           debug("💬 Non-streaming response:", { content: accumulatedText });
         }
 
         // Process the accumulated text (now from either streaming or non-streaming)
         if (accumulatedText && activeRequestId === requestId) {
-          // Clean the response text
-          let finalCleanedText = accumulatedText;
-
-          // Only remove if the AI literally repeated the entire prompt
-          if (accumulatedText.startsWith(prompt)) {
-            finalCleanedText = accumulatedText.substring(prompt.length).trim();
-          }
+          // For autocomplete, we don't need to clean the prompt from the response
+          // since we're asking for completions, not continuations
+          const finalText = accumulatedText.trim();
 
           // Update the UI with the final result
           view.dispatch(
             view.state.tr.setMeta(AUTOCOMPLETE_PLUGIN_KEY, {
-              ghostText: finalCleanedText || accumulatedText,
+              ghostText: finalText,
               isLoading: false,
               requestId,
             }),
@@ -896,10 +877,34 @@ export const AutoComplete = Extension.create<AutoCompleteOptions>({
               return false;
             }
 
-            // Skip if we just accepted a completion to prevent immediate re-trigger
-            if (pluginState.requestId === "accepted") {
-              lastTriggerTime = Date.now(); // Update to prevent immediate trigger
-              return false;
+            // Check if we just accepted a completion
+            if (pluginState.requestId?.startsWith("accepted-")) {
+              const acceptedTime = parseInt(pluginState.requestId.split("-")[1] || "0");
+              const timeSinceAccepted = Date.now() - acceptedTime;
+              
+              // Get current text to check how much user has typed since accepting
+              const { from } = view.state.selection;
+              const currentText = view.state.doc.textBetween(Math.max(0, from - 500), from);
+              const wordsTyped = currentText.trim().split(/\s+/).length;
+              
+              // Allow new completions after 0.5 seconds OR if user has typed at least 2 words
+              if (timeSinceAccepted < 500 && wordsTyped < 2) {
+                // Reset the state but don't trigger yet
+                view.dispatch(
+                  view.state.tr.setMeta(AUTOCOMPLETE_PLUGIN_KEY, {
+                    requestId: Date.now().toString(),
+                  }),
+                );
+                lastTriggerTime = Date.now();
+                return false;
+              } else {
+                // Clear the accepted state since enough time has passed or user typed enough
+                view.dispatch(
+                  view.state.tr.setMeta(AUTOCOMPLETE_PLUGIN_KEY, {
+                    requestId: Date.now().toString(),
+                  }),
+                );
+              }
             }
 
             // Reduced throttling for faster response
@@ -951,7 +956,7 @@ export const AutoComplete = Extension.create<AutoCompleteOptions>({
 
             // First, try immediate completion if we have cache
             const { from, to } = view.state.selection;
-            const textBefore = view.state.doc.textBetween(Math.max(0, from - 100), from);
+            const textBefore = view.state.doc.textBetween(Math.max(0, from - 500), from);
             const trimmedText = textBefore.trim();
 
             // Check if cursor is at the end of text before trying completion
