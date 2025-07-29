@@ -5,13 +5,25 @@ export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
   try {
+    // Get the filename from headers
+    const filename = req.headers.get("x-vercel-filename") || "image.png";
+    
+    // Read the file data directly from the request body
+    const fileBuffer = await req.arrayBuffer();
+    const file = new File([fileBuffer], filename, {
+      type: req.headers.get("content-type") || "application/octet-stream",
+    });
+
     // Check if blob storage is configured
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      // If no blob storage, return a placeholder response
+      // If no blob storage, convert to base64 data URL for display
+      const base64 = Buffer.from(fileBuffer).toString('base64');
+      const dataUrl = `data:${file.type};base64,${base64}`;
+      
       return new Response(
         JSON.stringify({
-          url: "/placeholder-image.jpg",
-          message: "Blob storage not configured. Using placeholder.",
+          url: dataUrl,
+          message: "Blob storage not configured. Using data URL.",
         }),
         {
           status: 200,
@@ -20,20 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const form = await req.formData();
-    const file = form.get("image") as File;
-
-    if (!file) {
-      return new Response(
-        JSON.stringify({ error: "No file provided" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const blob = await put(file.name, file, {
+    const blob = await put(filename, file, {
       access: "public",
     });
 

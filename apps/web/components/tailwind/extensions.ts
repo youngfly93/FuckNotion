@@ -10,7 +10,6 @@ import {
   HorizontalRule,
   MarkdownExtension,
   Mathematics,
-  Placeholder,
   StarterKit,
   TaskItem,
   TaskList,
@@ -24,6 +23,8 @@ import {
   Youtube,
 } from "novel";
 
+import Placeholder from "@tiptap/extension-placeholder";
+
 import Table from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableHeader from "@tiptap/extension-table-header";
@@ -36,8 +37,28 @@ import { DirectTableDrag } from "./direct-table-drag";
 
 //TODO I am using cx here to get tailwind autocomplete working, idk if someone else can write a regex to just capture the class key in objects
 const aiHighlight = AIHighlight;
-//You can overwrite the placeholder with your own configuration
-const placeholder = Placeholder;
+
+// Custom placeholder that only shows once
+const customPlaceholder = Placeholder.configure({
+  placeholder: ({ node, editor }) => {
+    if (node.type.name === "heading") {
+      return `Heading ${node.attrs.level}`;
+    }
+    
+    // Only show for the first empty paragraph
+    const { doc } = editor.state;
+    const firstNode = doc.firstChild;
+    const isFirstNode = firstNode && firstNode === node;
+    const isEmpty = node.content.size === 0;
+    
+    if (node.type.name === "paragraph" && isFirstNode && isEmpty) {
+      return "Press '/' for commands";
+    }
+    
+    return "";
+  },
+  includeChildren: false,
+});
 const tiptapLink = TiptapLink.configure({
   HTMLAttributes: {
     class: cx(
@@ -88,6 +109,8 @@ const horizontalRule = HorizontalRule.configure({
 const starterKit = StarterKit.configure({
   // 禁用 StarterKit 中的 codeBlock，因为我们使用 CodeBlockLowlight
   codeBlock: false,
+  // 禁用 StarterKit 中的 placeholder，因为我们使用从 headless 包导入的 Placeholder
+  placeholder: false,
   paragraph: {
     HTMLAttributes: {
       class: cx("mb-1"), // Reduced spacing between paragraphs for tighter layout
@@ -237,7 +260,7 @@ const tableCell = TableCell.configure({
 
 export const defaultExtensions = [
   starterKit,
-  placeholder,
+  customPlaceholder,
   tiptapLink,
   // 移除 tiptapImage，只保留 updatedImage 以避免重复
   updatedImage,

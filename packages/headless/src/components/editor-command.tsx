@@ -1,5 +1,5 @@
 import { useAtom, useSetAtom } from "jotai";
-import { useEffect, forwardRef, createContext } from "react";
+import { useEffect, forwardRef, createContext, useImperativeHandle } from "react";
 import { Command } from "cmdk";
 import { queryAtom, rangeAtom } from "../utils/atoms";
 import { novelStore } from "../utils/store";
@@ -14,49 +14,57 @@ interface EditorCommandOutProps {
   readonly range: Range;
 }
 
-export const EditorCommandOut: FC<EditorCommandOutProps> = ({ query, range }) => {
-  const setQuery = useSetAtom(queryAtom, { store: novelStore });
-  const setRange = useSetAtom(rangeAtom, { store: novelStore });
+export const EditorCommandOut = forwardRef<{ onKeyDown: (props: { event: KeyboardEvent }) => boolean }, EditorCommandOutProps>(
+  ({ query, range }, ref) => {
+    const setQuery = useSetAtom(queryAtom, { store: novelStore });
+    const setRange = useSetAtom(rangeAtom, { store: novelStore });
 
-  useEffect(() => {
-    setQuery(query);
-  }, [query, setQuery]);
+    useEffect(() => {
+      setQuery(query);
+    }, [query, setQuery]);
 
-  useEffect(() => {
-    setRange(range);
-  }, [range, setRange]);
+    useEffect(() => {
+      setRange(range);
+    }, [range, setRange]);
 
-  useEffect(() => {
-    const navigationKeys = ["ArrowUp", "ArrowDown", "Enter"];
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (navigationKeys.includes(e.key)) {
-        e.preventDefault();
-        const commandRef = document.querySelector("#slash-command");
-
-        if (commandRef)
-          commandRef.dispatchEvent(
-            new KeyboardEvent("keydown", {
-              key: e.key,
-              cancelable: true,
-              bubbles: true,
-            }),
-          );
-
-        return false;
+    // Expose onKeyDown method to the parent via ref
+    useImperativeHandle(ref, () => ({
+      onKeyDown: (props: { event: KeyboardEvent }) => {
+        const { event } = props;
+        
+        if (["ArrowUp", "ArrowDown", "Enter"].includes(event.key)) {
+          const commandRef = document.querySelector("#slash-command");
+          
+          if (commandRef && getComputedStyle(commandRef).display !== 'none') {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Find the hidden input and dispatch event to it
+            const hiddenInput = commandRef.querySelector('[cmdk-input]') as HTMLInputElement;
+            if (hiddenInput) {
+              hiddenInput.focus();
+              const keyEvent = new KeyboardEvent('keydown', {
+                key: event.key,
+                bubbles: true,
+                cancelable: true
+              });
+              hiddenInput.dispatchEvent(keyEvent);
+              return true; // Handled
+            }
+          }
+        }
+        
+        return false; // Not handled
       }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, []);
+    }), []);
 
-  return (
-    <EditorCommandTunnelContext.Consumer>
-      {(tunnelInstance) => <tunnelInstance.Out />}
-    </EditorCommandTunnelContext.Consumer>
-  );
-};
+    return (
+      <EditorCommandTunnelContext.Consumer>
+        {(tunnelInstance) => <tunnelInstance.Out />}
+      </EditorCommandTunnelContext.Consumer>
+    );
+  }
+);
 
 export const EditorCommand = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<typeof Command>>(
   ({ children, className, ...rest }, ref) => {
@@ -69,10 +77,11 @@ export const EditorCommand = forwardRef<HTMLDivElement, ComponentPropsWithoutRef
             <Command
               ref={ref}
               loop
+              tabIndex={0}
               onKeyDown={(e) => {
-                // Only stop propagation for non-navigation keys
-                // Allow ArrowUp, ArrowDown, and Enter to be handled by the Command component
-                if (!["ArrowUp", "ArrowDown", "Enter"].includes(e.key)) {
+                // Allow navigation keys to work within the command menu
+                // Only stop propagation for non-navigation keys  
+                if (!["ArrowUp", "ArrowDown", "Enter", "Escape"].includes(e.key)) {
                   e.stopPropagation();
                 }
               }}

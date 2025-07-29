@@ -17,10 +17,18 @@ const onUpload = (file: File) => {
         // Successfully uploaded image
         if (res.status === 200) {
           const { url } = (await res.json()) as { url: string };
+          console.log("Image uploaded, URL:", url); // Debug log
+          
           // preload the image
           const image = new Image();
           image.src = url;
           image.onload = () => {
+            console.log("Image preloaded successfully"); // Debug log
+            resolve(url);
+          };
+          image.onerror = () => {
+            console.error("Image preload failed"); // Debug log
+            // Still resolve with URL even if preload fails
             resolve(url);
           };
           // No blob store configured

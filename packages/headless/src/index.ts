@@ -45,7 +45,6 @@ export {
   Command,
   renderItems,
   createSuggestionItems,
-  handleCommandNavigation,
   type SuggestionItem,
 } from "./extensions";
 

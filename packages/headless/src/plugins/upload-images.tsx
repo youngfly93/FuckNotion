@@ -83,13 +83,18 @@ export const createImageUpload =
 
     onUpload(file).then(
       (src) => {
+        console.log("Image upload completed, src:", src); // Debug log
         const { schema } = view.state;
 
         const pos = findPlaceholder(view.state, id);
+        console.log("Placeholder position:", pos); // Debug log
 
         // If the content around the placeholder has been deleted, drop
         // the image
-        if (pos == null) return;
+        if (pos == null) {
+          console.log("Placeholder position is null, dropping image"); // Debug log
+          return;
+        }
 
         // Otherwise, insert it at the placeholder's position, and remove
         // the placeholder
@@ -97,12 +102,18 @@ export const createImageUpload =
         // When BLOB_READ_WRITE_TOKEN is not valid or unavailable, read
         // the image locally
         const imageSrc = typeof src === "object" ? reader.result : src;
+        console.log("Final image src:", imageSrc); // Debug log
 
         const node = schema.nodes.image?.create({ src: imageSrc });
-        if (!node) return;
+        console.log("Created image node:", node); // Debug log
+        if (!node) {
+          console.log("Failed to create image node"); // Debug log
+          return;
+        }
 
         const transaction = view.state.tr.replaceWith(pos, pos, node).setMeta(uploadKey, { remove: { id } });
         view.dispatch(transaction);
+        console.log("Image node inserted into editor"); // Debug log
       },
       () => {
         // Deletes the image placeholder on error

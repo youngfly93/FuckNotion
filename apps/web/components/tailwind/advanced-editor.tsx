@@ -10,7 +10,6 @@ import {
   EditorRoot,
   ImageResizer,
   type JSONContent,
-  handleCommandNavigation,
   handleImageDrop,
   handleImagePaste,
 } from "novel";
@@ -136,9 +135,6 @@ const TailwindAdvancedEditor = ({
           className={`editor-a4-layout ${darkMode ? "dark" : ""} relative border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
           immediatelyRender={false}
           editorProps={{
-            handleDOMEvents: {
-              keydown: (_view, event) => handleCommandNavigation(event),
-            },
             handlePaste: (view, event) => handleImagePaste(view, event, uploadFn),
             handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
             attributes: {

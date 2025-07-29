@@ -24,13 +24,24 @@ import Youtube from "@tiptap/extension-youtube";
 import GlobalDragHandle from "tiptap-extension-global-drag-handle";
 
 const PlaceholderExtension = Placeholder.configure({
-  placeholder: ({ node }) => {
+  placeholder: ({ node, editor }) => {
+    // Only show placeholder for the first paragraph in an empty document
+    const { doc } = editor.state;
+    const isEmptyDoc = doc.content.size <= 4; // Empty doc has minimal size
+    const isFirstNode = editor.state.selection.$anchor.pos <= 2;
+    
     if (node.type.name === "heading") {
       return `Heading ${node.attrs.level}`;
     }
-    return "Press '/' for commands";
+    
+    // Only show slash command hint for the first paragraph in empty documents
+    if (node.type.name === "paragraph" && isEmptyDoc && isFirstNode) {
+      return "Press '/' for commands";
+    }
+    
+    return "";
   },
-  includeChildren: true,
+  includeChildren: false, // Don't show placeholder for child nodes
 });
 
 const HighlightExtension = Highlight.configure({

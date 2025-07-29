@@ -95,27 +95,6 @@ export interface SuggestionItem {
 
 export const createSuggestionItems = (items: SuggestionItem[]) => items;
 
-export const handleCommandNavigation = (event: KeyboardEvent) => {
-  if (["ArrowUp", "ArrowDown", "Enter"].includes(event.key)) {
-    const slashCommand = document.querySelector("#slash-command");
-    if (slashCommand) {
-      // Prevent default behavior and stop propagation
-      event.preventDefault();
-      event.stopPropagation();
-
-      // Dispatch the keyboard event to the command component
-      slashCommand.dispatchEvent(
-        new KeyboardEvent("keydown", {
-          key: event.key,
-          cancelable: true,
-          bubbles: true,
-        })
-      );
-
-      return true;
-    }
-  }
-  return false;
-};
+// Navigation is handled by EditorCommandOut component
 
 export { Command, renderItems };
